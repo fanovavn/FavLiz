@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── USER ──────────────────────────────────────────────────
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  name       String?
+  username   String?  @unique
+  avatar     String?
+  themeColor String?
+  itemsLabel String?
+  language   String   @default("vi")
+  role       Role     @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items Item[]
+  lists List[]
+  tags  Tag[]
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// ─── ITEM ──────────────────────────────────────────────────
+model Item {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  thumbnail   String?
+  viewMode    ViewMode @default(PRIVATE)
+  shareSlug   String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  lists       List[]       @relation("ItemLists")
+  tags        Tag[]        @relation("ItemTags")
+  attachments Attachment[]
+
+  @@index([userId])
+  @@map("items")
+}
+
+enum ViewMode {
+  PRIVATE
+  PUBLIC
+}
+
+// ─── ATTACHMENT ────────────────────────────────────────────
+model Attachment {
+  id        String         @id @default(uuid())
+  type      AttachmentType
+  url       String
+  metadata  Json?
+  createdAt DateTime       @default(now())
+
+  itemId String
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+  @@map("attachments")
+}
+
+enum AttachmentType {
+  LINK
+  IMAGE
+}
+
+// ─── LIST ──────────────────────────────────────────────────
+model List {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  thumbnail   String?
+  viewMode    ViewMode @default(PRIVATE)
+  shareSlug   String?  @unique
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items Item[] @relation("ItemLists")
+
+  @@index([userId])
+  @@map("lists")
+}
+
+// ─── ADMIN USER (Back-Office) ──────────────────────────────
+model AdminUser {
+  id        String          @id @default(uuid())
+  username  String          @unique
+  password  String          // bcrypt hashed
+  name      String?
+  isRoot    Boolean         @default(false) // permanent root flag
+  isActive  Boolean         @default(true)
+  createdBy String?         // UUID of parent admin (null for ROOT)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  roles     AdminUserRole[]
+
+  @@map("admin_users")
+}
+
+// ─── RBAC ───────────────────────────────────────────────────
+model AdminRole {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  slug        String           @unique
+  description String?
+  isSystem    Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  users       AdminUserRole[]
+  permissions RolePermission[]
+
+  @@map("admin_roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  resource    String
+  action      String
+  description String?
+  roles       RolePermission[]
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
+
+model AdminUserRole {
+  adminUserId String
+  roleId      String
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  role        AdminRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([adminUserId, roleId])
+  @@map("admin_user_roles")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         AdminRole  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+
+// ─── TAG ───────────────────────────────────────────────────
+model Tag {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items Item[] @relation("ItemTags")
+
+  @@unique([name, userId])
+  @@index([userId])
+  @@map("tags")
+}
