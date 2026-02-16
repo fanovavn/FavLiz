@@ -233,6 +233,11 @@ export default function AdminSidebar({ adminName, isRoot, permissions = [], role
                         <LogOut className="w-[18px] h-[18px] shrink-0" />
                         {!collapsed && <span>Đăng xuất</span>}
                     </button>
+                    <div className={`py-2 ${collapsed ? "text-center" : "px-3"}`}>
+                        <span style={{ fontSize: "10px", color: "var(--color-text-muted)", opacity: 0.5 }}>
+                            {collapsed ? "v1" : "v1.0.0"}
+                        </span>
+                    </div>
                 </div>
             </aside>
         </>

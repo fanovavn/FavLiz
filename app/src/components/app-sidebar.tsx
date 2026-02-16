@@ -239,6 +239,11 @@ export function AppSidebar({ userEmail, itemsLabel = "Items" }: AppSidebarProps)
                             </button>
                         </form>
                     </div>
+                    <div className="px-4 py-2 text-center">
+                        <span style={{ fontSize: "10px", color: "var(--muted-light)", opacity: 0.5 }}>
+                            v1.0.0
+                        </span>
+                    </div>
                 </div>
             </aside>
 
