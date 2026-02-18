@@ -64,6 +64,62 @@ export async function signOut() {
     await supabase.auth.signOut();
 }
 
+/* ── Password Recovery ─────────────────────── */
+
+export async function requestPasswordReset(email: string) {
+    // Check if email exists in our database
+    const existingUser = await prisma.user.findFirst({
+        where: { email },
+        select: { id: true },
+    });
+
+    if (!existingUser) {
+        return { error: 'Email chưa được đăng ký trong hệ thống' };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    return { error: null };
+}
+
+export async function verifyRecoveryOtp(email: string, token: string) {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'recovery',
+    });
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    return { data, error: null };
+}
+
+export async function updatePassword(newPassword: string) {
+    const supabase = await createClient();
+
+    const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+    });
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    // Sign out so user can log in fresh with new password
+    await supabase.auth.signOut();
+
+    return { error: null };
+}
+
 async function syncUserToPrisma(supabaseId: string, email: string) {
     try {
         await prisma.user.upsert({

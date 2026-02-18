@@ -92,42 +92,40 @@ export default function RegisterPage() {
     const currentStep = stepConfig[step];
 
     return (
-        <div className="min-h-screen gradient-bg relative overflow-hidden flex items-center justify-center px-4 py-8">
-            {/* Orbs */}
-            <div
-                className="orb"
-                style={{
-                    width: 250,
-                    height: 250,
-                    background: "rgba(244, 143, 177, 0.6)",
-                    top: "5%",
-                    right: "10%",
-                }}
-            />
-            <div
-                className="orb"
-                style={{
-                    width: 180,
-                    height: 180,
-                    background: "rgba(233, 30, 99, 0.4)",
-                    bottom: "10%",
-                    left: "5%",
-                    animationDelay: "3s",
-                }}
-            />
+        <div
+            className="min-h-screen relative overflow-hidden flex items-center justify-center px-4 py-8"
+            style={{ background: "#F8FAFC" }}
+        >
+            {/* Animated Background */}
+            <div className="landing-bg-gradient" />
+            <div className="landing-grid-overlay" />
 
-            <div className="relative z-10 w-full max-w-md">
+            {/* Floating Orbs */}
+            <div className="landing-orb landing-orb-1" />
+            <div className="landing-orb landing-orb-2" />
+            <div className="landing-orb landing-orb-3" />
+
+            <div className="relative z-10 w-full max-w-md auth-fade-in">
                 {/* Logo */}
                 <Link
                     href="/"
-                    className="flex items-center justify-center gap-2 mb-8"
+                    className="flex items-center justify-center gap-2 mb-8 no-underline auth-slide-down"
                 >
-                    <Heart className="w-8 h-8 text-white fill-white" />
-                    <span className="text-2xl font-bold text-white">FavLiz</span>
+                    <Heart className="w-8 h-8 fill-pink-500" style={{ color: "#DB2777" }} />
+                    <span className="text-2xl font-bold landing-gradient-text">FavLiz</span>
                 </Link>
 
                 {/* Card */}
-                <div className="glass-card p-8">
+                <div
+                    className="p-8 rounded-[20px] auth-slide-up"
+                    style={{
+                        background: "rgba(255, 255, 255, 0.78)",
+                        backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
+                        border: "1px solid rgba(255, 255, 255, 0.65)",
+                        boxShadow: "0 8px 40px rgba(0, 0, 0, 0.06)",
+                    }}
+                >
                     {/* Progress Steps */}
                     <div className="flex items-center justify-center gap-2 mb-8">
                         {(["credentials", "otp"] as Step[]).map((s, i) => (
@@ -155,10 +153,10 @@ export default function RegisterPage() {
                         ))}
                     </div>
 
-                    <h1 className="text-2xl font-bold text-gray-800 text-center mb-1">
+                    <h1 className="text-2xl font-bold text-center mb-1" style={{ color: "#1E293B" }}>
                         {currentStep.title}
                     </h1>
-                    <p className="text-gray-500 text-center mb-6 text-sm">
+                    <p className="text-center mb-6 text-sm" style={{ color: "#94A3B8" }}>
                         {currentStep.subtitle}
                     </p>
 
@@ -264,18 +262,20 @@ export default function RegisterPage() {
                     {step === "otp" && (
                         <button
                             onClick={() => setStep("credentials")}
-                            className="w-full text-center text-sm text-gray-500 hover:text-pink-500 mt-4 transition-colors"
+                            className="w-full text-center text-sm mt-4 transition-colors"
+                            style={{ color: "#64748B" }}
                         >
                             ← Quay lại
                         </button>
                     )}
                 </div>
 
-                <p className="text-center text-white/70 text-sm mt-6">
+                <p className="text-center text-sm mt-6 auth-slide-up" style={{ color: "#64748B", animationDelay: "200ms" }}>
                     Đã có tài khoản?{" "}
                     <Link
                         href="/login"
-                        className="text-white font-semibold hover:underline"
+                        className="font-semibold"
+                        style={{ color: "#DB2777" }}
                     >
                         Đăng nhập
                     </Link>

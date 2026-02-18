@@ -31,54 +31,52 @@ export default function LoginPage() {
                 return;
             }
             router.push("/dashboard");
-        } catch {
-            setError("Email hoặc mật khẩu không đúng");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Có lỗi xảy ra khi kết nối. Vui lòng thử lại.");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen gradient-bg relative overflow-hidden flex items-center justify-center px-4 py-8">
-            {/* Orbs */}
-            <div
-                className="orb"
-                style={{
-                    width: 280,
-                    height: 280,
-                    background: "rgba(244, 143, 177, 0.6)",
-                    top: "15%",
-                    left: "5%",
-                }}
-            />
-            <div
-                className="orb"
-                style={{
-                    width: 200,
-                    height: 200,
-                    background: "rgba(233, 30, 99, 0.35)",
-                    bottom: "15%",
-                    right: "10%",
-                    animationDelay: "2s",
-                }}
-            />
+        <div
+            className="min-h-screen relative overflow-hidden flex items-center justify-center px-4 py-8"
+            style={{ background: "#F8FAFC" }}
+        >
+            {/* Animated Background */}
+            <div className="landing-bg-gradient" />
+            <div className="landing-grid-overlay" />
 
-            <div className="relative z-10 w-full max-w-md">
+            {/* Floating Orbs */}
+            <div className="landing-orb landing-orb-1" />
+            <div className="landing-orb landing-orb-2" />
+            <div className="landing-orb landing-orb-3" />
+
+            <div className="relative z-10 w-full max-w-md auth-fade-in">
                 {/* Logo */}
                 <Link
                     href="/"
-                    className="flex items-center justify-center gap-2 mb-8"
+                    className="flex items-center justify-center gap-2 mb-8 no-underline auth-slide-down"
                 >
-                    <Heart className="w-8 h-8 text-white fill-white" />
-                    <span className="text-2xl font-bold text-white">FavLiz</span>
+                    <Heart className="w-8 h-8 fill-pink-500" style={{ color: "#DB2777" }} />
+                    <span className="text-2xl font-bold landing-gradient-text">FavLiz</span>
                 </Link>
 
                 {/* Card */}
-                <div className="glass-card p-8">
-                    <h1 className="text-2xl font-bold text-gray-800 text-center mb-1">
+                <div
+                    className="p-8 rounded-[20px] auth-slide-up"
+                    style={{
+                        background: "rgba(255, 255, 255, 0.78)",
+                        backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
+                        border: "1px solid rgba(255, 255, 255, 0.65)",
+                        boxShadow: "0 8px 40px rgba(0, 0, 0, 0.06)",
+                    }}
+                >
+                    <h1 className="text-2xl font-bold text-center mb-1" style={{ color: "#1E293B" }}>
                         Chào mừng trở lại
                     </h1>
-                    <p className="text-gray-500 text-center mb-8 text-sm">
+                    <p className="text-center mb-8 text-sm" style={{ color: "#94A3B8" }}>
                         Đăng nhập để quản lý danh sách yêu thích
                     </p>
 
@@ -126,7 +124,8 @@ export default function LoginPage() {
                         <div className="text-right">
                             <Link
                                 href="/forgot-password"
-                                className="text-sm text-pink-500 hover:text-pink-600 font-medium"
+                                className="text-sm font-medium"
+                                style={{ color: "#DB2777" }}
                             >
                                 Quên mật khẩu?
                             </Link>
@@ -149,11 +148,12 @@ export default function LoginPage() {
                     </form>
                 </div>
 
-                <p className="text-center text-white/70 text-sm mt-6">
+                <p className="text-center text-sm mt-6 auth-slide-up" style={{ color: "#64748B", animationDelay: "200ms" }}>
                     Chưa có tài khoản?{" "}
                     <Link
                         href="/register"
-                        className="text-white font-semibold hover:underline"
+                        className="font-semibold"
+                        style={{ color: "#DB2777" }}
                     >
                         Đăng ký ngay
                     </Link>
