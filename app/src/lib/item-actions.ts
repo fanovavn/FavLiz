@@ -87,11 +87,13 @@ interface GetItemsParams {
     sort?: "newest" | "oldest" | "az" | "za";
     page?: number;
     pageSize?: number;
+    listId?: string;
+    tagId?: string;
 }
 
 export async function getItems(params: GetItemsParams = {}) {
     const userId = await getAuthUserId();
-    const { search, sort = "newest", page = 1, pageSize = 12 } = params;
+    const { search, sort = "newest", page = 1, pageSize = 12, listId, tagId } = params;
 
     const where: Record<string, unknown> = { userId };
     if (search) {
@@ -99,6 +101,12 @@ export async function getItems(params: GetItemsParams = {}) {
             { title: { contains: search, mode: "insensitive" } },
             { description: { contains: search, mode: "insensitive" } },
         ];
+    }
+    if (listId) {
+        where.lists = { some: { id: listId } };
+    }
+    if (tagId) {
+        where.tags = { some: { id: tagId } };
     }
 
     const orderBy: Record<string, string> =

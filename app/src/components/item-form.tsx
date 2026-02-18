@@ -300,36 +300,73 @@ export function ItemForm({
         .slice(0, 5);
 
     return (
-        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-3xl">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-8">
-                <Link
-                    href={
-                        mode === "edit" && initialData
-                            ? `/items/${initialData.id}`
-                            : "/items"
-                    }
-                    className="w-9 h-9 flex items-center justify-center cursor-pointer transition-colors"
-                    style={{
-                        borderRadius: "var(--radius-md)",
-                        background: "rgba(255,255,255,0.6)",
-                        border: "1px solid rgba(226,232,240,0.8)",
-                        color: "var(--muted)",
+        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-3xl mx-auto">
+            {/* ── Header: Back + Title + Save Button ── */}
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3 min-w-0">
+                    <Link
+                        href={
+                            mode === "edit" && initialData
+                                ? `/items/${initialData.id}`
+                                : "/items"
+                        }
+                        className="w-9 h-9 flex items-center justify-center cursor-pointer transition-colors shrink-0"
+                        style={{
+                            borderRadius: "var(--radius-md)",
+                            background: "rgba(255,255,255,0.6)",
+                            border: "1px solid rgba(226,232,240,0.8)",
+                            color: "var(--muted)",
+                        }}
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                    </Link>
+                    <div className="min-w-0">
+                        <h1
+                            className="text-xl sm:text-2xl font-bold truncate"
+                            style={{ color: "#1E293B" }}
+                        >
+                            {mode === "create" ? t("itemForm.addTitle", { item: singleItemLabel }) : t("itemForm.editTitle", { item: singleItemLabel })}
+                        </h1>
+                        <p className="text-xs mt-0.5 truncate" style={{ color: "var(--muted-light)" }}>
+                            {mode === "create"
+                                ? `Tạo và lưu trữ ${singleItemLabel.toLowerCase()} yêu thích của bạn`
+                                : `Chỉnh sửa thông tin ${singleItemLabel.toLowerCase()}`
+                            }
+                        </p>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        const form = document.querySelector<HTMLFormElement>('#item-form');
+                        form?.requestSubmit();
                     }}
+                    disabled={loading}
+                    className="gradient-btn flex items-center gap-2 px-5 py-2.5 text-sm shrink-0 ml-3"
                 >
-                    <ArrowLeft className="w-4 h-4" />
-                </Link>
-                <h1
-                    className="text-2xl font-bold"
-                    style={{ color: "#1E293B" }}
-                >
-                    {mode === "create" ? t("itemForm.addTitle", { item: singleItemLabel }) : t("itemForm.editTitle", { item: singleItemLabel })}
-                </h1>
+                    {loading ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="hidden sm:inline">{t("itemForm.saving")}</span>
+                        </>
+                    ) : (
+                        <>
+                            <Check className="w-4 h-4" />
+                            <span className="hidden sm:inline">
+                                {mode === "create"
+                                    ? t("itemForm.saveItem", { item: singleItemLabel })
+                                    : t("itemForm.updateItem", { item: singleItemLabel })
+                                }
+                            </span>
+                        </>
+                    )}
+                </button>
             </div>
 
             {error && (
                 <div
-                    className="text-sm px-4 py-3 mb-6"
+                    className="text-sm px-4 py-3 mb-5"
                     style={{
                         background: "rgba(239, 68, 68, 0.06)",
                         border: "1px solid rgba(239, 68, 68, 0.15)",
@@ -341,8 +378,20 @@ export function ItemForm({
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Top section: Thumbnail + Title & Description side by side */}
+            {/* ── Form Card ── */}
+            <form
+                id="item-form"
+                onSubmit={handleSubmit}
+                className="space-y-0"
+                style={{
+                    borderRadius: "var(--radius-xl, 20px)",
+                    background: "rgba(255,255,255,0.72)",
+                    border: "1px solid rgba(226,232,240,0.6)",
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.04)",
+                    overflow: "hidden",
+                }}
+            >
+                {/* Hidden file inputs */}
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -350,179 +399,152 @@ export function ItemForm({
                     className="hidden"
                     onChange={handleImageUpload}
                 />
+                <input
+                    ref={attachmentFileRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleAttachmentImageUpload}
+                />
 
-                <div
-                    className="grid gap-5"
-                    style={{
-                        gridTemplateColumns: "1fr",
-                    }}
-                >
-                    <style>{`
-                        @media (min-width: 640px) {
-                            .item-form-grid {
-                                grid-template-columns: 200px 1fr !important;
-                            }
-                        }
-                    `}</style>
-                    <div
-                        className="item-form-grid grid gap-5"
-                        style={{
-                            gridTemplateColumns: "1fr",
-                        }}
-                    >
-                        {/* Thumbnail - Left column */}
-                        <div className="flex flex-col">
-                            <label
-                                className="flex items-center gap-2 text-sm font-medium mb-2"
-                                style={{ color: "var(--muted)" }}
+                {/* ─── Section: Thumbnail ─── */}
+                <div className="px-5 sm:px-7 pt-6 pb-5 flex flex-col items-center">
+                    {thumbnail ? (
+                        <div
+                            className="relative overflow-hidden group"
+                            style={{
+                                borderRadius: "var(--radius-lg)",
+                                border: "1px solid var(--card-border)",
+                                width: "120px",
+                                height: "120px",
+                            }}
+                        >
+                            <img
+                                src={thumbnail}
+                                alt="Thumbnail"
+                                className="w-full h-full object-cover"
+                            />
+                            <div
+                                className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                style={{ background: "rgba(0,0,0,0.45)" }}
                             >
-                                <ImagePlus className="w-4 h-4" />
-                                Thumbnail
-                            </label>
-
-                            {thumbnail ? (
-                                <div
-                                    className="relative overflow-hidden group flex-1"
-                                    style={{
-                                        borderRadius: "var(--radius-lg)",
-                                        border: "1px solid var(--card-border)",
-                                        minHeight: "160px",
-                                    }}
-                                >
-                                    <img
-                                        src={thumbnail}
-                                        alt="Thumbnail preview"
-                                        className="w-full h-full object-cover"
-                                        style={{ minHeight: "160px" }}
-                                    />
-                                    <div
-                                        className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        style={{ background: "rgba(0,0,0,0.4)" }}
-                                    >
-                                        <button
-                                            type="button"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
-                                            style={{
-                                                borderRadius: "var(--radius-md)",
-                                                background: "rgba(255,255,255,0.9)",
-                                                color: "#334155",
-                                            }}
-                                        >
-                                            <ImagePlus className="w-3.5 h-3.5" />
-                                            Đổi
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={removeThumbnail}
-                                            className="px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
-                                            style={{
-                                                borderRadius: "var(--radius-md)",
-                                                background: "rgba(239, 68, 68, 0.9)",
-                                                color: "#fff",
-                                            }}
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                            Xóa
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    disabled={uploadingImage}
-                                    className="flex-1 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all"
+                                    className="w-8 h-8 flex items-center justify-center cursor-pointer"
                                     style={{
-                                        borderRadius: "var(--radius-lg)",
-                                        border: "2px dashed rgba(148, 163, 184, 0.4)",
-                                        background: "rgba(100, 116, 139, 0.02)",
-                                        color: "var(--muted)",
-                                        minHeight: "160px",
+                                        borderRadius: "var(--radius-sm)",
+                                        background: "rgba(255,255,255,0.9)",
+                                        color: "#334155",
                                     }}
                                 >
-                                    {uploadingImage ? (
-                                        <>
-                                            <Loader2
-                                                className="w-6 h-6 animate-spin"
-                                                style={{ color: "var(--primary)" }}
-                                            />
-                                            <span className="text-xs">Đang upload...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div
-                                                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                                style={{
-                                                    background: "rgba(100, 116, 139, 0.06)",
-                                                }}
-                                            >
-                                                <ImagePlus
-                                                    className="w-5 h-5"
-                                                    style={{ color: "#64748B" }}
-                                                />
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-xs font-medium" style={{ color: "#475569" }}>
-                                                    Chọn / Chụp ảnh
-                                                </p>
-                                                <p className="text-[10px] mt-0.5" style={{ color: "var(--muted-light)" }}>
-                                                    Tối đa 5MB
-                                                </p>
-                                            </div>
-                                        </>
-                                    )}
+                                    <ImagePlus className="w-4 h-4" />
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={removeThumbnail}
+                                    className="w-8 h-8 flex items-center justify-center cursor-pointer"
+                                    style={{
+                                        borderRadius: "var(--radius-sm)",
+                                        background: "rgba(239, 68, 68, 0.9)",
+                                        color: "#fff",
+                                    }}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploadingImage}
+                            className="flex flex-col items-center justify-center gap-2 cursor-pointer transition-all"
+                            style={{
+                                borderRadius: "var(--radius-lg)",
+                                border: "2px dashed rgba(148, 163, 184, 0.35)",
+                                background: "rgba(248, 250, 252, 0.6)",
+                                color: "var(--muted)",
+                                width: "120px",
+                                height: "120px",
+                            }}
+                        >
+                            {uploadingImage ? (
+                                <Loader2
+                                    className="w-6 h-6 animate-spin"
+                                    style={{ color: "var(--primary)" }}
+                                />
+                            ) : (
+                                <>
+                                    <div
+                                        className="w-10 h-10 rounded-xl flex items-center justify-center"
+                                        style={{ background: "rgba(100, 116, 139, 0.06)" }}
+                                    >
+                                        <ImagePlus className="w-5 h-5" style={{ color: "#94A3B8" }} />
+                                    </div>
+                                    <span className="text-[11px] font-medium" style={{ color: "#94A3B8" }}>Thêm ảnh</span>
+                                </>
                             )}
-                        </div>
-
-                        {/* Right column: Title + Description */}
-                        <div className="flex flex-col gap-4">
-                            {/* Title */}
-                            <div>
-                                <label
-                                    className="flex items-center gap-2 text-sm font-medium mb-2"
-                                    style={{ color: "var(--muted)" }}
-                                >
-                                    <Type className="w-4 h-4" />
-                                    {t("itemForm.nameLabel", { item: singleItemLabel })}{" "}
-                                    <span style={{ color: "var(--primary)" }}>*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    className="input-glass"
-                                    placeholder={t("itemForm.namePlaceholder")}
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                    autoFocus
-                                />
-                            </div>
-
-                            {/* Description */}
-                            <div className="flex-1 flex flex-col">
-                                <label
-                                    className="flex items-center gap-2 text-sm font-medium mb-2"
-                                    style={{ color: "var(--muted)" }}
-                                >
-                                    <FileText className="w-4 h-4" />
-                                    {t("itemForm.descLabel")}
-                                </label>
-                                <textarea
-                                    className="textarea-glass flex-1"
-                                    placeholder={t("itemForm.descPlaceholder", { item: singleItemLabel })}
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    rows={3}
-                                    style={{ minHeight: "80px" }}
-                                />
-                            </div>
-                        </div>
-                    </div>
+                        </button>
+                    )}
+                    <p className="text-[10px] mt-2" style={{ color: "var(--muted-light)" }}>
+                        Tối đa 5MB · JPG, PNG, WebP
+                    </p>
                 </div>
 
-                {/* Đính kèm */}
-                <div>
-                    <div className="flex items-center justify-between mb-2">
+                {/* Divider */}
+                <div style={{ height: "1px", background: "rgba(226,232,240,0.5)" }} />
+
+                {/* ─── Section: Title ─── */}
+                <div className="px-5 sm:px-7 py-5">
+                    <label
+                        className="flex items-center gap-2 text-sm font-medium mb-2.5"
+                        style={{ color: "var(--muted)" }}
+                    >
+                        <Type className="w-4 h-4" />
+                        {t("itemForm.nameLabel", { item: singleItemLabel })}{" "}
+                        <span style={{ color: "var(--primary)" }}>*</span>
+                    </label>
+                    <input
+                        type="text"
+                        className="input-glass"
+                        placeholder={t("itemForm.namePlaceholder")}
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        autoFocus
+                        style={{ fontSize: "22px", fontWeight: 700 }}
+                    />
+                </div>
+
+                {/* Divider */}
+                <div style={{ height: "1px", background: "rgba(226,232,240,0.5)" }} />
+
+                {/* ─── Section: Description ─── */}
+                <div className="px-5 sm:px-7 py-5">
+                    <label
+                        className="flex items-center gap-2 text-sm font-medium mb-2.5"
+                        style={{ color: "var(--muted)" }}
+                    >
+                        <FileText className="w-4 h-4" />
+                        {t("itemForm.descLabel")}
+                    </label>
+                    <textarea
+                        className="textarea-glass"
+                        placeholder={t("itemForm.descPlaceholder", { item: singleItemLabel })}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        rows={3}
+                        style={{ minHeight: "80px" }}
+                    />
+                </div>
+
+                {/* Divider */}
+                <div style={{ height: "1px", background: "rgba(226,232,240,0.5)" }} />
+
+                {/* ─── Section: Attachments ─── */}
+                <div className="px-5 sm:px-7 py-5">
+                    <div className="flex items-center justify-between mb-3">
                         <label
                             className="flex items-center gap-2 text-sm font-medium"
                             style={{ color: "var(--muted)" }}
@@ -545,16 +567,6 @@ export function ItemForm({
                             {attachments.length}/{MAX_ATTACHMENTS}
                         </span>
                     </div>
-
-                    {/* Hidden file input for attachment images */}
-                    <input
-                        ref={attachmentFileRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        className="hidden"
-                        onChange={handleAttachmentImageUpload}
-                    />
 
                     {/* Attachment list */}
                     {attachments.length > 0 && (
@@ -582,10 +594,7 @@ export function ItemForm({
                                                 placeholder="https://youtube.com/watch?v=..."
                                                 value={att.url}
                                                 onChange={(e) =>
-                                                    updateAttachmentUrl(
-                                                        i,
-                                                        e.target.value
-                                                    )
+                                                    updateAttachmentUrl(i, e.target.value)
                                                 }
                                             />
                                         </>
@@ -631,31 +640,32 @@ export function ItemForm({
 
                     {/* Add buttons */}
                     {canAddMore && (
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                             <button
                                 type="button"
                                 onClick={addLinkAttachment}
-                                className="text-sm font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
-                                style={{ color: "var(--primary)" }}
+                                className="text-sm font-medium flex items-center gap-1.5 px-3.5 py-2 cursor-pointer transition-all"
+                                style={{
+                                    borderRadius: "var(--radius-md)",
+                                    border: "1px solid rgba(226,232,240,0.8)",
+                                    background: "rgba(255,255,255,0.6)",
+                                    color: "var(--muted)",
+                                }}
                             >
-                                <Plus className="w-3 h-3" />
                                 <Link2 className="w-3.5 h-3.5" />
                                 Thêm link
                             </button>
-                            <span
-                                className="text-xs"
-                                style={{ color: "var(--muted-light)" }}
-                            >
-                                •
-                            </span>
                             <button
                                 type="button"
-                                onClick={() =>
-                                    attachmentFileRef.current?.click()
-                                }
+                                onClick={() => attachmentFileRef.current?.click()}
                                 disabled={uploadingAttachmentImage}
-                                className="text-sm font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
-                                style={{ color: "var(--primary)" }}
+                                className="text-sm font-medium flex items-center gap-1.5 px-3.5 py-2 cursor-pointer transition-all"
+                                style={{
+                                    borderRadius: "var(--radius-md)",
+                                    border: "1px solid rgba(226,232,240,0.8)",
+                                    background: "rgba(255,255,255,0.6)",
+                                    color: "var(--muted)",
+                                }}
                             >
                                 {uploadingAttachmentImage ? (
                                     <>
@@ -664,7 +674,6 @@ export function ItemForm({
                                     </>
                                 ) : (
                                     <>
-                                        <Plus className="w-3 h-3" />
                                         <ImageIcon className="w-3.5 h-3.5" />
                                         Thêm ảnh
                                     </>
@@ -674,17 +683,20 @@ export function ItemForm({
                     )}
                 </div>
 
-                {/* Tags */}
-                <div>
+                {/* Divider */}
+                <div style={{ height: "1px", background: "rgba(226,232,240,0.5)" }} />
+
+                {/* ─── Section: Tags ─── */}
+                <div className="px-5 sm:px-7 py-5">
                     <label
-                        className="flex items-center gap-2 text-sm font-medium mb-2"
+                        className="flex items-center gap-2 text-sm font-medium mb-3"
                         style={{ color: "var(--muted)" }}
                     >
                         <Tags className="w-4 h-4" />
                         Tags
                     </label>
                     {tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-2">
+                        <div className="flex flex-wrap gap-2 mb-3">
                             {tags.map((tag) => (
                                 <span key={tag} className="tag-chip">
                                     {tag}
@@ -733,48 +745,51 @@ export function ItemForm({
                     </div>
                 </div>
 
-                {/* Lists */}
-                <div>
+                {/* Divider */}
+                <div style={{ height: "1px", background: "rgba(226,232,240,0.5)" }} />
+
+                {/* ─── Section: Collections ─── */}
+                <div className="px-5 sm:px-7 py-5">
                     <label
-                        className="flex items-center gap-2 text-sm font-medium mb-2"
+                        className="flex items-center gap-2 text-sm font-medium mb-3"
                         style={{ color: "var(--muted)" }}
                     >
                         <FolderOpen className="w-4 h-4" />
                         Bộ sưu tập
                     </label>
                     <div className="flex flex-wrap gap-2">
-                        {localLists.map((list) => (
-                            <button
-                                key={list.id}
-                                type="button"
-                                onClick={() => toggleList(list.id)}
-                                className="px-4 py-2 text-sm font-medium cursor-pointer transition-all flex items-center gap-1.5"
-                                style={{
-                                    borderRadius: "var(--radius-md)",
-                                    border: selectedListIds.includes(list.id)
-                                        ? "1.5px solid rgba(100, 116, 139, 0.5)"
-                                        : "1.5px solid rgba(226,232,240,0.8)",
-                                    background: selectedListIds.includes(list.id)
-                                        ? "rgba(100, 116, 139, 0.06)"
-                                        : "rgba(255,255,255,0.6)",
-                                    color: selectedListIds.includes(list.id)
-                                        ? "#334155"
-                                        : "var(--muted)",
-                                }}
-                            >
-                                {selectedListIds.includes(list.id) && (
-                                    <Check className="w-3.5 h-3.5" />
-                                )}
-                                {list.name}
-                            </button>
-                        ))}
-                        {/* Add new list button */}
+                        {localLists.map((list) => {
+                            const isSelected = selectedListIds.includes(list.id);
+                            return (
+                                <button
+                                    key={list.id}
+                                    type="button"
+                                    onClick={() => toggleList(list.id)}
+                                    className="px-4 py-2 text-sm font-medium cursor-pointer transition-all flex items-center gap-1.5"
+                                    style={{
+                                        borderRadius: "999px",
+                                        border: isSelected
+                                            ? "1.5px solid var(--primary)"
+                                            : "1.5px solid rgba(226,232,240,0.8)",
+                                        background: isSelected
+                                            ? "color-mix(in srgb, var(--primary) 8%, transparent)"
+                                            : "rgba(255,255,255,0.6)",
+                                        color: isSelected
+                                            ? "var(--primary)"
+                                            : "var(--muted)",
+                                    }}
+                                >
+                                    {isSelected && <Check className="w-3.5 h-3.5" />}
+                                    {list.name}
+                                </button>
+                            );
+                        })}
                         <button
                             type="button"
                             onClick={() => setShowCreateList(true)}
-                            className="px-3 py-2 text-sm font-medium cursor-pointer transition-all flex items-center gap-1"
+                            className="px-4 py-2 text-sm font-medium cursor-pointer transition-all flex items-center gap-1"
                             style={{
-                                borderRadius: "var(--radius-md)",
+                                borderRadius: "999px",
                                 border: "1.5px dashed color-mix(in srgb, var(--primary) 35%, transparent)",
                                 background: "color-mix(in srgb, var(--primary) 5%, transparent)",
                                 color: "var(--primary)",
@@ -795,7 +810,7 @@ export function ItemForm({
                             }}
                         >
                             <div
-                                className="w-full max-w-sm p-6"
+                                className="w-full max-w-sm p-6 mx-4"
                                 style={{
                                     borderRadius: "var(--radius-lg)",
                                     background: "rgba(255,255,255,0.95)",
@@ -876,81 +891,125 @@ export function ItemForm({
                     )}
                 </div>
 
-                {/* View Mode */}
-                <div>
+                {/* Divider */}
+                <div style={{ height: "1px", background: "rgba(226,232,240,0.5)" }} />
+
+                {/* ─── Section: Visibility ─── */}
+                <div className="px-5 sm:px-7 py-5">
                     <label
-                        className="text-sm font-medium mb-3 block"
+                        className="flex items-center gap-2 text-sm font-medium mb-3"
                         style={{ color: "var(--muted)" }}
                     >
+                        <Lock className="w-4 h-4" />
                         {t("itemForm.visibility")}
                     </label>
-                    <div className="flex gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                         <button
                             type="button"
                             onClick={() => setViewMode("PRIVATE")}
-                            className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium cursor-pointer transition-all"
+                            className="flex items-center gap-3 p-4 cursor-pointer transition-all text-left"
                             style={{
-                                borderRadius: "var(--radius-md)",
+                                borderRadius: "var(--radius-lg)",
                                 border:
                                     viewMode === "PRIVATE"
-                                        ? "1.5px solid #94A3B8"
+                                        ? "1.5px solid var(--primary)"
                                         : "1.5px solid rgba(226,232,240,0.8)",
                                 background:
                                     viewMode === "PRIVATE"
-                                        ? "rgba(100, 116, 139, 0.06)"
+                                        ? "color-mix(in srgb, var(--primary) 5%, transparent)"
                                         : "rgba(255,255,255,0.4)",
-                                color:
-                                    viewMode === "PRIVATE"
-                                        ? "#475569"
-                                        : "var(--muted-light)",
                             }}
                         >
-                            <Lock className="w-4 h-4" />
-                            {t("common.private")}
+                            <div
+                                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                                style={{
+                                    background: viewMode === "PRIVATE"
+                                        ? "color-mix(in srgb, var(--primary) 10%, transparent)"
+                                        : "rgba(100, 116, 139, 0.06)",
+                                }}
+                            >
+                                <Lock
+                                    className="w-5 h-5"
+                                    style={{
+                                        color: viewMode === "PRIVATE"
+                                            ? "var(--primary)"
+                                            : "var(--muted-light)",
+                                    }}
+                                />
+                            </div>
+                            <div className="min-w-0">
+                                <p
+                                    className="text-sm font-semibold"
+                                    style={{
+                                        color: viewMode === "PRIVATE"
+                                            ? "#1E293B"
+                                            : "var(--muted)",
+                                    }}
+                                >
+                                    {t("common.private")}
+                                </p>
+                                <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--muted-light)" }}>
+                                    Chỉ bạn xem được
+                                </p>
+                            </div>
+                            {viewMode === "PRIVATE" && (
+                                <Check className="w-5 h-5 shrink-0 ml-auto" style={{ color: "var(--primary)" }} />
+                            )}
                         </button>
                         <button
                             type="button"
                             onClick={() => setViewMode("PUBLIC")}
-                            className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium cursor-pointer transition-all"
+                            className="flex items-center gap-3 p-4 cursor-pointer transition-all text-left"
                             style={{
-                                borderRadius: "var(--radius-md)",
+                                borderRadius: "var(--radius-lg)",
                                 border:
                                     viewMode === "PUBLIC"
                                         ? "1.5px solid #86EFAC"
                                         : "1.5px solid rgba(226,232,240,0.8)",
                                 background:
                                     viewMode === "PUBLIC"
-                                        ? "rgba(34, 197, 94, 0.06)"
+                                        ? "rgba(34, 197, 94, 0.05)"
                                         : "rgba(255,255,255,0.4)",
-                                color:
-                                    viewMode === "PUBLIC"
-                                        ? "#16A34A"
-                                        : "var(--muted-light)",
                             }}
                         >
-                            <Globe className="w-4 h-4" />
-                            {t("common.public")}
+                            <div
+                                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                                style={{
+                                    background: viewMode === "PUBLIC"
+                                        ? "rgba(34, 197, 94, 0.08)"
+                                        : "rgba(100, 116, 139, 0.06)",
+                                }}
+                            >
+                                <Globe
+                                    className="w-5 h-5"
+                                    style={{
+                                        color: viewMode === "PUBLIC"
+                                            ? "#16A34A"
+                                            : "var(--muted-light)",
+                                    }}
+                                />
+                            </div>
+                            <div className="min-w-0">
+                                <p
+                                    className="text-sm font-semibold"
+                                    style={{
+                                        color: viewMode === "PUBLIC"
+                                            ? "#1E293B"
+                                            : "var(--muted)",
+                                    }}
+                                >
+                                    {t("common.public")}
+                                </p>
+                                <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--muted-light)" }}>
+                                    Mọi người có thể xem
+                                </p>
+                            </div>
+                            {viewMode === "PUBLIC" && (
+                                <Check className="w-5 h-5 shrink-0 ml-auto" style={{ color: "#16A34A" }} />
+                            )}
                         </button>
                     </div>
                 </div>
-
-                {/* Submit */}
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="gradient-btn w-full flex items-center justify-center gap-2 py-3.5"
-                >
-                    {loading ? (
-                        <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            {t("itemForm.saving")}
-                        </>
-                    ) : mode === "create" ? (
-                        t("itemForm.saveItem", { item: singleItemLabel })
-                    ) : (
-                        t("itemForm.updateItem", { item: singleItemLabel })
-                    )}
-                </button>
             </form>
         </div>
     );

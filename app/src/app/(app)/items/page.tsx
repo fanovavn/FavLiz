@@ -1,18 +1,32 @@
 import { Suspense } from "react";
 import { getItems } from "@/lib/item-actions";
+import { getLists } from "@/lib/list-actions";
+import { getTagsWithCounts } from "@/lib/item-actions";
 import { ItemsListClient } from "@/components/items-list-client";
 
 interface Props {
-    searchParams: Promise<{ search?: string; sort?: string; page?: string }>;
+    searchParams: Promise<{
+        search?: string;
+        sort?: string;
+        page?: string;
+        listId?: string;
+        tagId?: string;
+    }>;
 }
 
 export default async function ItemsPage({ searchParams }: Props) {
     const params = await searchParams;
-    const data = await getItems({
-        search: params.search,
-        sort: (params.sort as "newest" | "oldest" | "az" | "za") || "newest",
-        page: params.page ? parseInt(params.page) : 1,
-    });
+    const [data, lists, tags] = await Promise.all([
+        getItems({
+            search: params.search,
+            sort: (params.sort as "newest" | "oldest" | "az" | "za") || "newest",
+            page: params.page ? parseInt(params.page) : 1,
+            listId: params.listId,
+            tagId: params.tagId,
+        }),
+        getLists(),
+        getTagsWithCounts(),
+    ]);
 
     return (
         <Suspense
@@ -22,7 +36,11 @@ export default async function ItemsPage({ searchParams }: Props) {
                 </div>
             }
         >
-            <ItemsListClient initialData={data} />
+            <ItemsListClient
+                initialData={data}
+                lists={lists}
+                tags={tags}
+            />
         </Suspense>
     );
 }
