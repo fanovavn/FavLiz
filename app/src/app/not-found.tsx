@@ -240,7 +240,7 @@ export default function NotFound() {
             {/* Footer */}
             <footer className="text-center py-6">
                 <p className="text-xs" style={{ color: "#94A3B8" }}>
-                    © 2026 FavLiz · Lưu giữ mọi thứ yêu thích ❤️
+                    © 2026 FavLiz · From <span style={{ fontWeight: 600, color: "#64748B" }}>Fanova</span> Team with ❤️
                 </p>
             </footer>
         </div>

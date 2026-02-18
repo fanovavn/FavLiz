@@ -239,9 +239,12 @@ export function AppSidebar({ userEmail, itemsLabel = "Items" }: AppSidebarProps)
                             </button>
                         </form>
                     </div>
-                    <div className="px-4 py-2 text-center">
-                        <span style={{ fontSize: "10px", color: "var(--muted-light)", opacity: 0.5 }}>
-                            v1.0.0
+                    <div className="px-4 py-2 text-center space-y-0.5">
+                        <span style={{ fontSize: "10px", color: "var(--muted-light)", opacity: 0.5, display: "block" }}>
+                            v1.0.1
+                        </span>
+                        <span style={{ fontSize: "9px", color: "var(--muted-light)", opacity: 0.4, display: "block" }}>
+                            From Fanova with ❤️
                         </span>
                     </div>
                 </div>

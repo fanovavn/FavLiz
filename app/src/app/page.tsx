@@ -133,16 +133,16 @@ export default async function LandingPage() {
           borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
         }}
       >
-        <div className="flex items-center justify-between max-w-[1200px] mx-auto px-6 py-4">
-          <Link href="/" className="flex items-center gap-2.5 no-underline">
-            <Heart className="w-7 h-7 fill-pink-500" style={{ color: "#DB2777" }} />
-            <span className="text-2xl font-extrabold landing-gradient-text">FavLiz</span>
+        <div className="flex items-center justify-between max-w-[1200px] mx-auto px-4 py-3 sm:px-6 sm:py-4">
+          <Link href="/" className="flex items-center gap-2 no-underline shrink-0">
+            <Heart className="w-6 h-6 sm:w-7 sm:h-7 fill-pink-500" style={{ color: "#DB2777" }} />
+            <span className="text-xl sm:text-2xl font-extrabold landing-gradient-text">FavLiz</span>
           </Link>
 
           {isLoggedIn ? (
             /* ── Authenticated state ─── */
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium" style={{ color: "#64748B" }}>
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <span className="hidden sm:inline text-sm font-medium truncate" style={{ color: "#64748B" }}>
                 Xin chào,{" "}
                 <span className="font-semibold" style={{ color: "#1E293B" }}>
                   {userName || "bạn"}
@@ -150,7 +150,7 @@ export default async function LandingPage() {
               </span>
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white rounded-lg transition-all duration-200 no-underline hover:scale-[1.02]"
+                className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-5 text-xs sm:text-sm font-semibold text-white rounded-lg transition-all duration-200 no-underline hover:scale-[1.02] whitespace-nowrap shrink-0"
                 style={{
                   background: "linear-gradient(135deg, #DB2777, #EC4899)",
                   boxShadow: "0 4px 16px rgba(219, 39, 119, 0.25)",
@@ -162,7 +162,7 @@ export default async function LandingPage() {
             </div>
           ) : (
             /* ── Guest state ─── */
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Link
                 href="/login"
                 className="hidden md:inline-flex px-5 py-2 text-sm font-medium rounded-lg transition-all duration-200 no-underline"
@@ -172,13 +172,13 @@ export default async function LandingPage() {
               </Link>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white rounded-lg transition-all duration-200 no-underline hover:scale-[1.02]"
+                className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-5 text-xs sm:text-sm font-semibold text-white rounded-lg transition-all duration-200 no-underline hover:scale-[1.02] whitespace-nowrap"
                 style={{
                   background: "linear-gradient(135deg, #DB2777, #EC4899)",
                   boxShadow: "0 4px 16px rgba(219, 39, 119, 0.25)",
                 }}
               >
-                <Zap className="w-4 h-4" />
+                <Zap className="w-4 h-4 hidden sm:block" />
                 Bắt đầu miễn phí
               </Link>
             </div>
@@ -519,7 +519,8 @@ export default async function LandingPage() {
             <span className="text-lg font-bold" style={{ color: "#1E293B" }}>FavLiz</span>
           </div>
           <p className="text-[0.82rem]" style={{ color: "#94A3B8" }}>
-            © 2026 FavLiz. Made with ❤️ in Vietnam
+            © 2026 FavLiz · From{" "}
+            <span className="font-semibold" style={{ color: "#64748B" }}>Fanova</span> Team with ❤️
           </p>
         </div>
       </footer>
