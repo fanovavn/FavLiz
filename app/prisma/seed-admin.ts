@@ -25,7 +25,7 @@ async function main() {
             username: "tientd",
             password: hashedPassword,
             name: "Tien TD",
-            role: "ROOT",
+            isRoot: true,
             isActive: true,
             createdBy: null,
         },
