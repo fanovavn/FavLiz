@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 // ─── HELPERS ────────────────────────────────────────────────
 
@@ -280,3 +281,64 @@ export async function getUncategorizedItems() {
         updatedAt: item.updatedAt.toISOString(),
     }));
 }
+
+// ─── GET ITEMS FOR LIST PICKER ──────────────────────────────
+
+export async function getItemsForListPicker(listId: string) {
+    const userId = await getAuthUserId();
+
+    // Get all user items
+    const allItems = await prisma.item.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        select: {
+            id: true,
+            title: true,
+            thumbnail: true,
+            lists: { select: { id: true } },
+        },
+    });
+
+    return allItems.map((item) => ({
+        id: item.id,
+        title: item.title,
+        thumbnail: item.thumbnail,
+        isInList: item.lists.some((l) => l.id === listId),
+    }));
+}
+
+// ─── ADD/REMOVE ITEMS TO/FROM LIST ──────────────────────────
+
+export async function updateListItems(listId: string, itemIds: string[]) {
+    const userId = await getAuthUserId();
+
+    // Verify the list belongs to the user
+    const list = await prisma.list.findFirst({
+        where: { id: listId, userId },
+        select: { id: true },
+    });
+
+    if (!list) return { error: "Bộ sưu tập không tồn tại." };
+
+    // Verify all items belong to the user
+    const items = await prisma.item.findMany({
+        where: { id: { in: itemIds }, userId },
+        select: { id: true },
+    });
+
+    const validItemIds = items.map((i) => i.id);
+
+    // Set the list's items to exactly the selected items
+    await prisma.list.update({
+        where: { id: listId },
+        data: {
+            items: {
+                set: validItemIds.map((id) => ({ id })),
+            },
+        },
+    });
+
+    revalidatePath(`/lists/${listId}`);
+    return { success: true };
+}
+

@@ -20,10 +20,12 @@ import {
     Check,
     X,
     Link2,
+    Plus,
 } from "lucide-react";
 import { ItemCard } from "@/components/item-card";
 import { DeleteListButton } from "@/components/delete-list-dialog";
 import { useTagPopup } from "@/components/tag-detail-popup";
+import { AddItemsToListModal } from "@/components/add-items-to-list-modal";
 
 // ─── TYPES ──────────────────────────────────────────────────
 
@@ -72,6 +74,7 @@ export function ListDetailClient({
     const [sharePopupOpen, setSharePopupOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     const [fullShareUrl, setFullShareUrl] = useState("");
+    const [addItemsOpen, setAddItemsOpen] = useState(false);
     const { openTag } = useTagPopup();
 
     useEffect(() => {
@@ -168,6 +171,20 @@ export function ListDetailClient({
                         <ArrowLeft className="w-4 h-4" />
                     </Link>
                     <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setAddItemsOpen(true)}
+                            className="w-9 h-9 flex items-center justify-center transition-colors cursor-pointer"
+                            style={{
+                                borderRadius: "var(--radius-full)",
+                                background: "rgba(0,0,0,0.35)",
+                                backdropFilter: "blur(8px)",
+                                color: "#fff",
+                                border: "none",
+                            }}
+                            title={`Thêm ${singleItemLabel}`}
+                        >
+                            <Plus className="w-4 h-4" />
+                        </button>
                         <Link
                             href={`/lists/${list.id}/edit`}
                             className="w-9 h-9 flex items-center justify-center transition-colors"
@@ -459,9 +476,13 @@ export function ListDetailClient({
                         <p className="text-sm mb-5" style={{ color: "var(--muted)" }}>
                             {emptyDesc}
                         </p>
-                        <Link href="/items/new" className="gradient-btn" style={{ textDecoration: "none" }}>
+                        <button
+                            onClick={() => setAddItemsOpen(true)}
+                            className="gradient-btn cursor-pointer"
+                            style={{ border: "none" }}
+                        >
                             <span>{addItemLabel}</span>
-                        </Link>
+                        </button>
                     </div>
                 ) : filteredItems.length === 0 ? (
                     /* No Search Results */
@@ -589,6 +610,14 @@ export function ListDetailClient({
                     </div>
                 )}
             </div>
+
+            {/* ─── Add Items Modal ──────────────────────────── */}
+            <AddItemsToListModal
+                listId={list.id}
+                singleItemLabel={singleItemLabel}
+                open={addItemsOpen}
+                onClose={() => setAddItemsOpen(false)}
+            />
         </div>
     );
 }

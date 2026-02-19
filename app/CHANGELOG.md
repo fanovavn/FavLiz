@@ -4,6 +4,27 @@ Tất cả thay đổi đáng chú ý của **Web User** sẽ được ghi nhậ
 
 ---
 
+## [v1.3.0] — 2026-02-19
+
+### 🎯 Thêm items vào bộ sưu tập & Sửa lỗi
+
+#### ✨ Tính năng mới
+- **Thêm items vào bộ sưu tập** — popup chọn items từ trang chi tiết bộ sưu tập:
+  - Hiển thị tất cả items với checkbox, tick sẵn items đã có trong bộ sưu tập
+  - Tìm kiếm nhanh theo title
+  - Nút **+** trên hero nav và nút ở empty state đều mở popup
+  - Bấm "Áp dụng" để cập nhật danh sách items
+
+#### 🐛 Sửa lỗi
+- Fix header bộ sưu tập không đi theo tông màu theme (hardcoded green → CSS variables)
+- Fix lỗi redirect sau khi xoá bộ sưu tập / item (dùng `router.replace` thay `router.push`)
+
+#### 🔧 Backend
+- Thêm `getItemsForListPicker()` — lấy tất cả items kèm flag đã có trong list chưa
+- Thêm `updateListItems()` — cập nhật danh sách items của bộ sưu tập (many-to-many set)
+
+---
+
 ## [v1.2.0] — 2026-02-19
 
 ### 🎉 Onboarding, Theme System & Collection Management
