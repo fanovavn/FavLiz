@@ -23,13 +23,12 @@ export function DeleteItemButton({ itemId, itemTitle }: DeleteItemButtonProps) {
             const result = await deleteItem(itemId);
             if (result.error) {
                 alert(result.error);
+                setLoading(false);
                 return;
             }
-            router.push("/items");
-            router.refresh();
+            router.replace("/items");
         } catch {
             alert("Có lỗi xảy ra khi xóa item.");
-        } finally {
             setLoading(false);
         }
     };

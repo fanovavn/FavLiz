@@ -147,7 +147,7 @@ export function ListDetailClient({
                         className="w-full h-full"
                         style={{
                             background:
-                                "linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #4ade80 100%)",
+                                "linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 50%, var(--primary-dark) 100%)",
                         }}
                     />
                 )}

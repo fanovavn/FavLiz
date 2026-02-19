@@ -23,13 +23,12 @@ export function DeleteListButton({ listId, listName }: DeleteListButtonProps) {
             const result = await deleteList(listId);
             if (result.error) {
                 alert(result.error);
+                setLoading(false);
                 return;
             }
-            router.push("/lists");
-            router.refresh();
+            router.replace("/lists");
         } catch {
             alert("Có lỗi xảy ra khi xóa bộ sưu tập.");
-        } finally {
             setLoading(false);
         }
     };
