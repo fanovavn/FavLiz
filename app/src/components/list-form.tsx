@@ -374,11 +374,11 @@ export function ListForm({ mode, initialData }: ListFormProps) {
                     >
                         Chế độ hiển thị
                     </label>
-                    <div className="flex gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                         <button
                             type="button"
                             onClick={() => setViewMode("PRIVATE")}
-                            className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium cursor-pointer transition-all"
+                            className="flex flex-col items-center gap-1.5 py-4 text-sm font-medium cursor-pointer transition-all"
                             style={{
                                 borderRadius: "var(--radius-md)",
                                 border:
@@ -395,31 +395,37 @@ export function ListForm({ mode, initialData }: ListFormProps) {
                                         : "var(--muted-light)",
                             }}
                         >
-                            <Lock className="w-4 h-4" />
-                            Private
+                            <Lock className="w-5 h-5" />
+                            <span className="font-semibold">Private</span>
+                            <span className="text-xs font-normal" style={{ color: "var(--muted-light)" }}>
+                                Chỉ mình bạn thấy
+                            </span>
                         </button>
                         <button
                             type="button"
                             onClick={() => setViewMode("PUBLIC")}
-                            className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium cursor-pointer transition-all"
+                            className="flex flex-col items-center gap-1.5 py-4 text-sm font-medium cursor-pointer transition-all"
                             style={{
                                 borderRadius: "var(--radius-md)",
                                 border:
                                     viewMode === "PUBLIC"
-                                        ? "1.5px solid #86EFAC"
+                                        ? "1.5px solid var(--primary)"
                                         : "1.5px solid rgba(226,232,240,0.8)",
                                 background:
                                     viewMode === "PUBLIC"
-                                        ? "rgba(34, 197, 94, 0.06)"
+                                        ? "color-mix(in srgb, var(--primary) 6%, transparent)"
                                         : "rgba(255,255,255,0.4)",
                                 color:
                                     viewMode === "PUBLIC"
-                                        ? "#16A34A"
+                                        ? "var(--primary)"
                                         : "var(--muted-light)",
                             }}
                         >
-                            <Globe className="w-4 h-4" />
-                            Public
+                            <Globe className="w-5 h-5" />
+                            <span className="font-semibold">Public</span>
+                            <span className="text-xs font-normal" style={{ color: "var(--muted-light)" }}>
+                                Mọi người có thể xem
+                            </span>
                         </button>
                     </div>
                 </div>

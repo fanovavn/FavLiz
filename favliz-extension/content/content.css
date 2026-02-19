@@ -1,0 +1,569 @@
+/* ═══════════════════════════════════════════════════════════════
+   FavLiz Extension — Content Script Styles
+   Floating Button + Inline Post Buttons + Save Modal
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── CSS Variables ──────────────────────────────────────────── */
+:root {
+    --favliz-primary: #FF1E56;
+    --favliz-primary-light: #FF4D6D;
+    --favliz-gradient: linear-gradient(135deg, #FF4D6D 0%, #FF1E56 100%);
+    --favliz-bg: rgba(255, 255, 255, 0.95);
+    --favliz-glass: rgba(255, 255, 255, 0.85);
+    --favliz-border: rgba(255, 255, 255, 0.3);
+    --favliz-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --favliz-text: #1a1a2e;
+    --favliz-text-muted: #6b7280;
+    --favliz-radius: 12px;
+    --favliz-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --favliz-z: 2147483640;
+}
+
+/* ─── Floating Action Button ─────────────────────────────────── */
+#favliz-ext-fab {
+    position: fixed !important;
+    bottom: 50% !important;
+    right: -22px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: var(--favliz-gradient) !important;
+    color: white !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 16px rgba(255, 30, 86, 0.35) !important;
+    z-index: var(--favliz-z) !important;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.2s ease,
+        box-shadow 0.3s ease,
+        border-radius 0.3s ease !important;
+    padding: 0 !important;
+    outline: none !important;
+    font-family: var(--favliz-font) !important;
+    opacity: 0.75 !important;
+}
+
+#favliz-ext-fab:hover {
+    right: 0px !important;
+    border-radius: 12px 0 0 12px !important;
+    width: 48px !important;
+    box-shadow: 0 6px 24px rgba(255, 30, 86, 0.55) !important;
+    opacity: 1 !important;
+}
+
+#favliz-ext-fab:active {
+    transform: scale(0.95) !important;
+}
+
+#favliz-ext-fab svg {
+    width: 22px !important;
+    height: 22px !important;
+    fill: none !important;
+    stroke: white !important;
+}
+
+/* ─── Inline Post Button ─────────────────────────────────────── */
+.favliz-ext-post-btn {
+    position: absolute !important;
+    top: 8px !important;
+    right: 48px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 4px 10px !important;
+    border-radius: 16px !important;
+    background: var(--favliz-gradient) !important;
+    color: white !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    font-family: var(--favliz-font) !important;
+    line-height: 1 !important;
+    transition: all 0.2s ease !important;
+    outline: none !important;
+    white-space: nowrap !important;
+    height: 26px !important;
+    box-shadow: 0 2px 8px rgba(255, 30, 86, 0.3) !important;
+    z-index: 9999 !important;
+    opacity: 0.85 !important;
+}
+
+.favliz-ext-post-btn:hover {
+    transform: scale(1.08) !important;
+    box-shadow: 0 4px 12px rgba(255, 30, 86, 0.5) !important;
+    opacity: 1 !important;
+}
+
+.favliz-ext-post-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+    fill: none !important;
+    stroke: white !important;
+}
+
+.favliz-ext-post-btn span {
+    color: white !important;
+    font-size: 11px !important;
+}
+
+/* ─── Modal Overlay ──────────────────────────────────────────── */
+#favliz-ext-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(4px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: calc(var(--favliz-z) + 10) !important;
+    animation: favliz-fade-in 0.2s ease !important;
+    padding: 16px !important;
+}
+
+@keyframes favliz-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ─── Modal Card ─────────────────────────────────────────────── */
+#favliz-ext-modal {
+    width: 420px !important;
+    max-width: 100% !important;
+    max-height: 90vh !important;
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    animation: favliz-slide-up 0.25s ease !important;
+    font-family: var(--favliz-font) !important;
+}
+
+@keyframes favliz-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─── Modal Header ───────────────────────────────────────────── */
+.favliz-ext-modal-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 14px 16px !important;
+    background: var(--favliz-gradient) !important;
+    color: white !important;
+}
+
+.favliz-ext-modal-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    color: white !important;
+    flex: 1 !important;
+}
+
+.favliz-ext-modal-logo svg {
+    flex-shrink: 0 !important;
+}
+
+.favliz-ext-platform-badge {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 3px 10px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: white !important;
+}
+
+.favliz-ext-modal-close {
+    background: none !important;
+    border: none !important;
+    color: white !important;
+    cursor: pointer !important;
+    font-size: 18px !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    opacity: 0.8 !important;
+    transition: opacity 0.2s !important;
+    line-height: 1 !important;
+}
+
+.favliz-ext-modal-close:hover {
+    opacity: 1 !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ─── Modal Body ─────────────────────────────────────────────── */
+.favliz-ext-modal-body {
+    padding: 16px !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+    background: white !important;
+}
+
+/* ─── Preview Card ───────────────────────────────────────────── */
+.favliz-ext-preview-card {
+    display: flex !important;
+    gap: 12px !important;
+    padding: 10px !important;
+    background: rgba(255, 77, 109, 0.05) !important;
+    border: 1px solid rgba(255, 77, 109, 0.12) !important;
+    border-radius: var(--favliz-radius) !important;
+    margin-bottom: 16px !important;
+}
+
+.favliz-ext-preview-img {
+    width: 72px !important;
+    height: 54px !important;
+    object-fit: cover !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+    background: #f0f0f0 !important;
+}
+
+.favliz-ext-preview-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+.favliz-ext-preview-title {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--favliz-text) !important;
+    margin-bottom: 4px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    line-height: 1.3 !important;
+}
+
+.favliz-ext-preview-url {
+    font-size: 11px !important;
+    color: var(--favliz-text-muted) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* ─── Form ───────────────────────────────────────────────────── */
+.favliz-ext-form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+}
+
+.favliz-ext-field {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+}
+
+.favliz-ext-field label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--favliz-text-muted) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.favliz-ext-field input[type="text"],
+.favliz-ext-field input[type="email"],
+.favliz-ext-field input[type="password"],
+.favliz-ext-field input[type="url"],
+.favliz-ext-field textarea {
+    width: 100% !important;
+    padding: 9px 12px !important;
+    border: 1.5px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-family: var(--favliz-font) !important;
+    color: var(--favliz-text) !important;
+    background: white !important;
+    transition: border-color 0.2s !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    resize: vertical !important;
+}
+
+.favliz-ext-field input[type="text"]:focus,
+.favliz-ext-field input[type="email"]:focus,
+.favliz-ext-field input[type="password"]:focus,
+.favliz-ext-field input[type="url"]:focus,
+.favliz-ext-field textarea:focus {
+    border-color: var(--favliz-primary) !important;
+    box-shadow: 0 0 0 3px rgba(255, 30, 86, 0.1) !important;
+}
+
+/* ─── Multi-Select ───────────────────────────────────────────── */
+.favliz-ext-multiselect {
+    position: relative !important;
+}
+
+.favliz-ext-multiselect input {
+    width: 100% !important;
+    padding: 9px 12px !important;
+    border: 1.5px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-family: var(--favliz-font) !important;
+    color: var(--favliz-text) !important;
+    background: white !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+}
+
+.favliz-ext-multiselect input:focus {
+    border-color: var(--favliz-primary) !important;
+    box-shadow: 0 0 0 3px rgba(255, 30, 86, 0.1) !important;
+}
+
+.favliz-ext-selected-chips {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    margin-bottom: 4px !important;
+}
+
+.favliz-ext-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 3px 8px !important;
+    background: rgba(255, 77, 109, 0.1) !important;
+    color: var(--favliz-primary) !important;
+    border-radius: 12px !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    font-family: var(--favliz-font) !important;
+}
+
+.favliz-ext-chip button {
+    background: none !important;
+    border: none !important;
+    color: var(--favliz-primary) !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    opacity: 0.6 !important;
+}
+
+.favliz-ext-chip button:hover {
+    opacity: 1 !important;
+}
+
+/* ─── Dropdown ───────────────────────────────────────────────── */
+.favliz-ext-dropdown {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+    max-height: 160px !important;
+    overflow-y: auto !important;
+    z-index: 10 !important;
+    display: none;
+    margin-top: 4px !important;
+}
+
+.favliz-ext-dropdown-item {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    font-family: var(--favliz-font) !important;
+    color: var(--favliz-text) !important;
+    transition: background 0.15s !important;
+}
+
+.favliz-ext-dropdown-item:hover {
+    background: rgba(255, 77, 109, 0.08) !important;
+}
+
+.favliz-ext-create-new {
+    color: var(--favliz-primary) !important;
+    font-weight: 600 !important;
+}
+
+.new-badge {
+    font-size: 10px !important;
+    background: var(--favliz-gradient) !important;
+    color: white !important;
+    padding: 1px 5px !important;
+    border-radius: 6px !important;
+    margin-left: 4px !important;
+}
+
+/* ─── Toggle Group ───────────────────────────────────────────── */
+.favliz-ext-toggle-group {
+    display: flex !important;
+    gap: 6px !important;
+}
+
+.favliz-ext-toggle-btn {
+    flex: 1 !important;
+    padding: 7px 12px !important;
+    border: 1.5px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    background: white !important;
+    color: var(--favliz-text-muted) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    font-family: var(--favliz-font) !important;
+    transition: all 0.2s !important;
+}
+
+.favliz-ext-toggle-btn.active {
+    border-color: var(--favliz-primary) !important;
+    background: rgba(255, 77, 109, 0.06) !important;
+    color: var(--favliz-primary) !important;
+    font-weight: 600 !important;
+}
+
+/* ─── Modal Footer ───────────────────────────────────────────── */
+.favliz-ext-modal-footer {
+    display: flex !important;
+    gap: 8px !important;
+    padding: 14px 16px !important;
+    border-top: 1px solid #f0f0f0 !important;
+}
+
+.favliz-ext-btn-primary {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 16px !important;
+    background: var(--favliz-gradient) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    font-family: var(--favliz-font) !important;
+    transition: all 0.2s !important;
+}
+
+.favliz-ext-btn-primary:hover {
+    box-shadow: 0 4px 16px rgba(255, 30, 86, 0.4) !important;
+    transform: translateY(-1px) !important;
+}
+
+.favliz-ext-btn-primary:disabled {
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+.favliz-ext-btn-primary.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+
+.favliz-ext-btn-primary svg {
+    stroke: white !important;
+    fill: none !important;
+}
+
+.favliz-ext-btn-secondary {
+    padding: 10px 16px !important;
+    background: transparent !important;
+    color: var(--favliz-text-muted) !important;
+    border: 1.5px solid #e5e7eb !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    font-family: var(--favliz-font) !important;
+    transition: all 0.2s !important;
+}
+
+.favliz-ext-btn-secondary:hover {
+    background: #f9fafb !important;
+    border-color: #d1d5db !important;
+}
+
+/* ─── Spinner ────────────────────────────────────────────────── */
+.favliz-ext-spinner {
+    display: inline-block !important;
+    width: 16px !important;
+    height: 16px !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    border-top-color: white !important;
+    border-radius: 50% !important;
+    animation: favliz-spin 0.6s linear infinite !important;
+}
+
+@keyframes favliz-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ─── Toast ──────────────────────────────────────────────────── */
+#favliz-ext-toast {
+    position: fixed !important;
+    bottom: 80px !important;
+    right: 24px !important;
+    padding: 10px 18px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    font-family: var(--favliz-font) !important;
+    z-index: calc(var(--favliz-z) + 20) !important;
+    opacity: 0 !important;
+    transform: translateY(10px) !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+    max-width: 320px !important;
+}
+
+#favliz-ext-toast.show {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+.favliz-ext-toast-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+}
+
+.favliz-ext-toast-error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+}
+
+.favliz-ext-toast-info {
+    background: var(--favliz-gradient) !important;
+    color: white !important;
+}

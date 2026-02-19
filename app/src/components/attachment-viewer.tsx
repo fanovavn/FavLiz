@@ -45,12 +45,13 @@ function formatLinkUrl(url: string): string {
 }
 
 export function AttachmentViewer({ attachments }: AttachmentViewerProps) {
-    const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+    const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
     if (attachments.length === 0) return null;
 
     const links = attachments.filter((a) => a.type === "LINK");
     const images = attachments.filter((a) => a.type === "IMAGE");
+    const imageUrls = images.map((img) => img.url);
 
     return (
         <>
@@ -146,23 +147,24 @@ export function AttachmentViewer({ attachments }: AttachmentViewerProps) {
                             Hình ảnh
                         </p>
                         <div
-                            className="flex gap-3"
+                            className="grid gap-2"
                             style={{
-                                overflowX: "auto",
-                                paddingBottom: "4px",
+                                gridTemplateColumns: images.length === 1
+                                    ? "1fr"
+                                    : "repeat(auto-fill, minmax(120px, 1fr))",
                             }}
                         >
-                            {images.map((att) => (
+                            {images.map((att, idx) => (
                                 <button
                                     key={att.id}
                                     type="button"
-                                    onClick={() => setLightboxSrc(att.url)}
-                                    className="overflow-hidden cursor-pointer group relative shrink-0"
+                                    onClick={() => setLightboxIndex(idx)}
+                                    className="overflow-hidden cursor-pointer group relative aspect-square"
                                     style={{
                                         borderRadius: "var(--radius-md)",
                                         border: "1.5px solid rgba(0,0,0,0.07)",
-                                        width: "150px",
-                                        height: "150px",
+                                        maxHeight: "150px",
+                                        maxWidth: "150px",
                                     }}
                                 >
                                     <img
@@ -183,11 +185,13 @@ export function AttachmentViewer({ attachments }: AttachmentViewerProps) {
                 )}
             </div>
 
-            {/* Lightbox */}
-            {lightboxSrc && (
+            {/* Lightbox with album navigation */}
+            {lightboxIndex !== null && (
                 <ImageLightbox
-                    src={lightboxSrc}
-                    onClose={() => setLightboxSrc(null)}
+                    images={imageUrls}
+                    currentIndex={lightboxIndex}
+                    onClose={() => setLightboxIndex(null)}
+                    onNavigate={(idx) => setLightboxIndex(idx)}
                 />
             )}
         </>
