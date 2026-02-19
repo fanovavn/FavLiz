@@ -40,10 +40,11 @@ export function DeleteListButton({ listId, listName }: DeleteListButtonProps) {
                 onClick={() => setOpen(true)}
                 className="w-9 h-9 flex items-center justify-center cursor-pointer transition-colors"
                 style={{
-                    borderRadius: "var(--radius-md)",
-                    background: "rgba(255,255,255,0.6)",
-                    border: "1px solid rgba(239,68,68,0.15)",
-                    color: "#FCA5A5",
+                    borderRadius: "var(--radius-full)",
+                    background: "rgba(0,0,0,0.35)",
+                    backdropFilter: "blur(8px)",
+                    border: "none",
+                    color: "#fff",
                 }}
             >
                 <Trash2 className="w-4 h-4" />

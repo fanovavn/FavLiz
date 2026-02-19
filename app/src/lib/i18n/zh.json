@@ -32,7 +32,11 @@
     },
     "dashboard": {
         "greeting": "你好, {name} 👋",
+        "greetingMorning": "早上好, {name}",
+        "greetingAfternoon": "下午好, {name}",
+        "greetingEvening": "晚上好, {name}",
         "subtitle": "你的收藏概览",
+        "heroSummary": "你已有 {items} 个{itemLabel}，分布在 {lists} 个收藏集",
         "collections": "收藏集",
         "recentlyAdded": "最近添加",
         "quickActions": "快捷操作",
@@ -41,7 +45,18 @@
         "manageCollections": "管理收藏集",
         "manageTags": "管理标签",
         "noItemsYet": "还没有{item}，现在开始添加吧！",
-        "addItem": "添加{item}"
+        "addItem": "添加{item}",
+        "thisWeek": "本周",
+        "weeklyActivity": "本周活动",
+        "totalAdded": "添加了{count}个",
+        "tagDistribution": "标签分布",
+        "featuredCollections": "热门收藏集",
+        "popularTags": "热门标签",
+        "tipTitle": "💡 提示：使用标签更快分类",
+        "tipDesc": "为项目添加标签，帮助你快速搜索和筛选。",
+        "tryNow": "立即尝试",
+        "items2": "{count} 个项目",
+        "noData": "暂无数据"
     },
     "items": {
         "title": "收藏",
@@ -90,7 +105,13 @@
         "itemCount": "{count} 个{item}",
         "noItemsInList": "没有{item}",
         "noItemsInListDesc": "在创建或编辑时将{item}添加到此收藏集",
-        "addItemToList": "添加{item}"
+        "addItemToList": "添加{item}",
+        "searchPlaceholder": "搜索收藏集...",
+        "uncategorized": "未分类",
+        "uncategorizedDesc": "未添加到任何收藏集的{item}",
+        "totalItems": "总{item}数",
+        "publicCount": "公开",
+        "createNewHint": "按主题分类{item}"
     },
     "listForm": {
         "createTitle": "创建新收藏集",
@@ -198,5 +219,46 @@
         "title": "404",
         "message": "页面不存在",
         "backHome": "返回首页"
+    },
+    "onboarding": {
+        "step": "步骤 {current} / {total}",
+        "step1Label": "欢迎来到 FavLiz",
+        "step1Title": "收藏你喜欢的一切",
+        "step1Desc": "FavLiz 帮你保存和整理所有喜欢的东西——从食谱、旅行地点到实用链接。一切都在一个地方，整洁易找。",
+        "step1Button": "开始探索",
+        "step2Label": "你好！",
+        "step2Title": "我们该怎么称呼你？👋",
+        "step2Desc": "输入你的名字或昵称，让我们为你个性化体验。",
+        "step2Placeholder": "例如：小明、Meow、Boss...",
+        "step2Preview": "你好，{name}！很高兴认识你 🎉",
+        "step3Label": "自定义收藏",
+        "step3Title": "你喜欢收藏什么？✨",
+        "step3Desc": "给你的收藏命名——或选择下面的建议。",
+        "step3Placeholder": "例如：食谱、地点、链接...",
+        "step3Chips": [
+            "食谱",
+            "地点",
+            "链接",
+            "照片",
+            "Meoz ^^"
+        ],
+        "step3PreviewLabel": "预览：",
+        "step4Label": "主题",
+        "step4Title": "你喜欢什么颜色主题？🎨",
+        "step4Desc": "选择你空间的主色调。",
+        "step4Custom": "自定义颜色",
+        "step4CustomHide": "隐藏自定义",
+        "step4CustomLabel": "自定义颜色",
+        "step5Label": "完成",
+        "step5Title": "一切就绪！🎉",
+        "step5Desc": "所有设置已完成。开始收藏你喜欢的东西吧！",
+        "step5Name": "你的名字",
+        "step5Collection": "收藏",
+        "step5Color": "主题颜色",
+        "step5Button": "开始使用 ✨",
+        "back": "返回",
+        "skip": "跳过",
+        "next": "继续",
+        "skipToast": "你可以稍后在设置中自定义"
     }
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Lock, Globe } from "lucide-react";
 import { getThumbnailColor } from "@/lib/utils";
+import { useTagPopup } from "@/components/tag-detail-popup";
 
 interface ItemCardProps {
     item: {
@@ -18,6 +19,7 @@ interface ItemCardProps {
 
 export function ItemCard({ item }: ItemCardProps) {
     const bgColor = getThumbnailColor(item.title);
+    const { openTag } = useTagPopup();
 
     return (
         <Link href={`/items/${item.id}`} className="block">
@@ -63,10 +65,15 @@ export function ItemCard({ item }: ItemCardProps) {
                             {item.tags.slice(0, 3).map((tag) => (
                                 <span
                                     key={tag.id}
-                                    className="tag-chip"
+                                    className="tag-chip cursor-pointer"
                                     style={{
                                         padding: "2px 8px",
                                         fontSize: "0.7rem",
+                                    }}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        openTag(tag.id, tag.name);
                                     }}
                                 >
                                     {tag.name}

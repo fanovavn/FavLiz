@@ -22,9 +22,9 @@ import {
     Check,
 } from "lucide-react";
 import { createItem, updateItem } from "@/lib/item-actions";
-import { createList } from "@/lib/list-actions";
 import { useItemsLabel } from "@/components/items-label-provider";
 import { useLanguage } from "@/components/language-provider";
+import { CreateListModal } from "@/components/create-list-modal";
 
 interface ItemFormProps {
     mode: "create" | "edit";
@@ -75,8 +75,6 @@ export function ItemForm({
     );
     const [localLists, setLocalLists] = useState(availableLists);
     const [showCreateList, setShowCreateList] = useState(false);
-    const [newListName, setNewListName] = useState("");
-    const [creatingList, setCreatingList] = useState(false);
     const [attachments, setAttachments] = useState<
         { type: "LINK" | "IMAGE"; url: string }[]
     >(
@@ -181,26 +179,6 @@ export function ItemForm({
         );
     };
 
-    const handleCreateList = async () => {
-        const trimmed = newListName.trim();
-        if (!trimmed) return;
-        setCreatingList(true);
-        try {
-            const result = await createList({
-                name: trimmed,
-                viewMode: "PRIVATE",
-            });
-            const newList = { id: result.id, name: trimmed };
-            setLocalLists((prev) => [...prev, newList]);
-            setSelectedListIds((prev) => [...prev, result.id]);
-            setNewListName("");
-            setShowCreateList(false);
-        } catch {
-            setError("Không thể tạo bộ sưu tập.");
-        } finally {
-            setCreatingList(false);
-        }
-    };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -300,7 +278,7 @@ export function ItemForm({
         .slice(0, 5);
 
     return (
-        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-3xl mx-auto">
+        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-[1280px] mx-auto">
             {/* ── Header: Back + Title + Save Button ── */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3 min-w-0">
@@ -800,95 +778,15 @@ export function ItemForm({
                         </button>
                     </div>
 
-                    {/* Create list popup */}
-                    {showCreateList && (
-                        <div
-                            className="fixed inset-0 z-50 flex items-center justify-center"
-                            style={{ background: "rgba(0,0,0,0.4)" }}
-                            onClick={(e) => {
-                                if (e.target === e.currentTarget) setShowCreateList(false);
-                            }}
-                        >
-                            <div
-                                className="w-full max-w-sm p-6 mx-4"
-                                style={{
-                                    borderRadius: "var(--radius-lg)",
-                                    background: "rgba(255,255,255,0.95)",
-                                    backdropFilter: "blur(20px)",
-                                    boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-                                    border: "1px solid rgba(255,255,255,0.5)",
-                                }}
-                            >
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3
-                                        className="text-base font-bold flex items-center gap-2"
-                                        style={{ color: "#1E293B" }}
-                                    >
-                                        <FolderOpen className="w-4 h-4" style={{ color: "var(--primary)" }} />
-                                        Tạo bộ sưu tập mới
-                                    </h3>
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowCreateList(false)}
-                                        className="cursor-pointer p-1 transition-colors"
-                                        style={{ color: "var(--muted-light)" }}
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </div>
-                                <input
-                                    type="text"
-                                    className="input-glass mb-4"
-                                    placeholder="Tên bộ sưu tập..."
-                                    value={newListName}
-                                    onChange={(e) => setNewListName(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            e.preventDefault();
-                                            handleCreateList();
-                                        }
-                                    }}
-                                    autoFocus
-                                />
-                                <div className="flex gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowCreateList(false)}
-                                        className="flex-1 py-2.5 text-sm font-medium cursor-pointer transition-all"
-                                        style={{
-                                            borderRadius: "var(--radius-md)",
-                                            border: "1px solid rgba(226,232,240,0.8)",
-                                            background: "rgba(255,255,255,0.6)",
-                                            color: "var(--muted)",
-                                        }}
-                                    >
-                                        Huỷ
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleCreateList}
-                                        disabled={creatingList || !newListName.trim()}
-                                        className="flex-1 py-2.5 text-sm font-medium cursor-pointer transition-all flex items-center justify-center gap-2"
-                                        style={{
-                                            borderRadius: "var(--radius-md)",
-                                            background: "linear-gradient(135deg, var(--primary), var(--primary-light))",
-                                            color: "#fff",
-                                            opacity: creatingList || !newListName.trim() ? 0.5 : 1,
-                                        }}
-                                    >
-                                        {creatingList ? (
-                                            <>
-                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                                Đang tạo...
-                                            </>
-                                        ) : (
-                                            "Tạo & gán"
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {/* Create list modal */}
+                    <CreateListModal
+                        open={showCreateList}
+                        onClose={() => setShowCreateList(false)}
+                        onCreated={(list) => {
+                            setLocalLists((prev) => [...prev, list]);
+                            setSelectedListIds((prev) => [...prev, list.id]);
+                        }}
+                    />
                 </div>
 
                 {/* Divider */}

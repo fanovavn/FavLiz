@@ -32,7 +32,11 @@
     },
     "dashboard": {
         "greeting": "Xin chào, {name} 👋",
+        "greetingMorning": "Chào buổi sáng, {name}",
+        "greetingAfternoon": "Chào buổi chiều, {name}",
+        "greetingEvening": "Chào buổi tối, {name}",
         "subtitle": "Tổng quan bộ sưu tập của bạn",
+        "heroSummary": "Bạn đã có {items} {itemLabel} trong {lists} bộ sưu tập",
         "collections": "Bộ sưu tập",
         "recentlyAdded": "Thêm gần đây",
         "quickActions": "Thao tác nhanh",
@@ -41,7 +45,18 @@
         "manageCollections": "Quản lý Bộ sưu tập",
         "manageTags": "Quản lý Tags",
         "noItemsYet": "Chưa có {item} nào. Bắt đầu thêm ngay!",
-        "addItem": "Thêm {item}"
+        "addItem": "Thêm {item}",
+        "thisWeek": "tuần này",
+        "weeklyActivity": "Hoạt động tuần này",
+        "totalAdded": "{count} lượt thêm",
+        "tagDistribution": "Phân bố tag",
+        "featuredCollections": "Bộ sưu tập nổi bật",
+        "popularTags": "Tag phổ biến",
+        "tipTitle": "💡 Mẹo: Sử dụng Tags để phân loại nhanh hơn",
+        "tipDesc": "Gắn tag cho items giúp bạn tìm kiếm và lọc nhanh chóng. Thử tạo tag theo loại, chủ đề, hoặc mức độ ưu tiên.",
+        "tryNow": "Thử ngay",
+        "items2": "{count} items",
+        "noData": "Chưa có dữ liệu"
     },
     "items": {
         "title": "Items",
@@ -90,7 +105,13 @@
         "itemCount": "{count} {item}",
         "noItemsInList": "Chưa có {item}",
         "noItemsInListDesc": "Thêm {item} vào bộ sưu tập này khi tạo hoặc chỉnh sửa",
-        "addItemToList": "Thêm {item}"
+        "addItemToList": "Thêm {item}",
+        "searchPlaceholder": "Tìm bộ sưu tập...",
+        "uncategorized": "Chưa phân loại",
+        "uncategorizedDesc": "Các {item} chưa được gán vào bộ sưu tập nào",
+        "totalItems": "Tổng {item}",
+        "publicCount": "Công khai",
+        "createNewHint": "Nhóm các {item} theo chủ đề"
     },
     "listForm": {
         "createTitle": "Tạo bộ sưu tập mới",
@@ -198,5 +219,46 @@
         "title": "404",
         "message": "Trang không tồn tại",
         "backHome": "Quay về trang chủ"
+    },
+    "onboarding": {
+        "step": "Bước {current} / {total}",
+        "step1Label": "Chào mừng bạn đến với FavLiz",
+        "step1Title": "Lưu trữ mọi điều yêu thích của bạn",
+        "step1Desc": "FavLiz giúp bạn lưu giữ và tổ chức tất cả những điều bạn yêu thích — từ công thức nấu ăn, địa điểm du lịch, đến những đường link hay. Mọi thứ đều ở một nơi, gọn gàng và dễ tìm.",
+        "step1Button": "Bắt đầu khám phá",
+        "step2Label": "Xin chào!",
+        "step2Title": "Chúng tôi có thể gọi bạn là gì? 👋",
+        "step2Desc": "Nhập tên hoặc biệt danh để chúng tôi cá nhân hoá trải nghiệm cho bạn.",
+        "step2Placeholder": "Ví dụ: Tiến, Meow, Boss...",
+        "step2Preview": "Xin chào, {name}! Rất vui được gặp bạn 🎉",
+        "step3Label": "Tuỳ chỉnh bộ sưu tập",
+        "step3Title": "Bạn tập trung lưu trữ điều yêu thích gì? ✨",
+        "step3Desc": "Đặt tên cho nơi lưu trữ của bạn — hoặc chọn gợi ý bên dưới.",
+        "step3Placeholder": "Ví dụ: Công thức, Địa điểm, Link hay...",
+        "step3Chips": [
+            "Công thức",
+            "Địa điểm",
+            "Link hay",
+            "Phim ảnh",
+            "Meoz ^^"
+        ],
+        "step3PreviewLabel": "Preview:",
+        "step4Label": "Giao diện",
+        "step4Title": "Bạn thích giao diện màu gì? 🎨",
+        "step4Desc": "Chọn màu chủ đạo cho không gian của bạn.",
+        "step4Custom": "Chọn màu tuỳ chỉnh",
+        "step4CustomHide": "Ẩn màu tuỳ chỉnh",
+        "step4CustomLabel": "Màu tuỳ chỉnh",
+        "step5Label": "Hoàn tất",
+        "step5Title": "Tất cả đã sẵn sàng! 🎉",
+        "step5Desc": "Mọi thứ đã được setup xong. Hãy bắt đầu lưu trữ những điều yêu thích nhé!",
+        "step5Name": "Tên của bạn",
+        "step5Collection": "Bộ sưu tập",
+        "step5Color": "Màu giao diện",
+        "step5Button": "Bắt đầu sử dụng ✨",
+        "back": "Quay lại",
+        "skip": "Bỏ qua",
+        "next": "Tiếp tục",
+        "skipToast": "Bạn có thể tuỳ chỉnh sau trong phần Cài đặt"
     }
 }

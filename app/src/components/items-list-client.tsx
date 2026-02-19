@@ -21,6 +21,7 @@ import { ItemCard } from "@/components/item-card";
 import { useItemsLabel } from "@/components/items-label-provider";
 import { useLanguage } from "@/components/language-provider";
 import { getThumbnailColor } from "@/lib/utils";
+import { useTagPopup } from "@/components/tag-detail-popup";
 import Link from "next/link";
 
 interface ItemType {
@@ -58,7 +59,7 @@ interface ItemsListClientProps {
     tags: TagType[];
 }
 
-function ItemRow({ item }: { item: ItemType }) {
+function ItemRow({ item, openTag }: { item: ItemType; openTag: (id: string, name: string) => void }) {
     const bgColor = getThumbnailColor(item.title);
     return (
         <Link href={`/items/${item.id}`} className="block">
@@ -122,8 +123,13 @@ function ItemRow({ item }: { item: ItemType }) {
                         {item.tags.slice(0, 3).map((tag) => (
                             <span
                                 key={tag.id}
-                                className="tag-chip"
+                                className="tag-chip cursor-pointer"
                                 style={{ padding: "1px 7px", fontSize: "0.65rem" }}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    openTag(tag.id, tag.name);
+                                }}
                             >
                                 {tag.name}
                             </span>
@@ -215,6 +221,7 @@ export function ItemsListClient({ initialData, lists, tags }: ItemsListClientPro
     const [selectedTagId, setSelectedTagId] = useState(searchParams.get("tagId") || "");
     const [viewMode, setViewMode] = useState<"list" | "grid">("list");
     const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+    const { openTag } = useTagPopup();
 
     const updateUrl = useCallback(
         (newSearch: string, newSort: string, newPage: number, newListId: string, newTagId: string) => {
@@ -376,7 +383,7 @@ export function ItemsListClient({ initialData, lists, tags }: ItemsListClientPro
     );
 
     return (
-        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-6xl">
+        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-[1280px] mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 page-header-responsive">
                 <div>
@@ -607,7 +614,7 @@ export function ItemsListClient({ initialData, lists, tags }: ItemsListClientPro
                     ) : viewMode === "list" ? (
                         <div className="space-y-2">
                             {items.map((item) => (
-                                <ItemRow key={item.id} item={item} />
+                                <ItemRow key={item.id} item={item} openTag={openTag} />
                             ))}
                         </div>
                     ) : (

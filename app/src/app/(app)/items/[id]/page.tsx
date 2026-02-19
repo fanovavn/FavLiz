@@ -15,6 +15,7 @@ import { getThumbnailColor } from "@/lib/utils";
 import { DeleteItemButton } from "@/components/delete-item-dialog";
 import { AttachmentViewer } from "@/components/attachment-viewer";
 import { ShareButton } from "@/components/share-button";
+import { TagChipButton } from "@/components/tag-chip-button";
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -30,7 +31,7 @@ export default async function ItemDetailPage({ params }: Props) {
     const shareUrl = item.viewMode === "PUBLIC" ? await getShareUrl("item", id) : null;
 
     return (
-        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-3xl mx-auto">
+        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-[1280px] mx-auto">
             {/* Hero Card: Left-aligned Thumbnail + Badge + Title + Description */}
             <div
                 className="glass-card mb-6 relative"
@@ -159,13 +160,11 @@ export default async function ItemDetailPage({ params }: Props) {
                             </h3>
                             <div className="flex flex-wrap gap-2">
                                 {item.tags.map((tag) => (
-                                    <Link
+                                    <TagChipButton
                                         key={tag.id}
-                                        href={`/tags/${tag.id}`}
-                                        className="tag-chip hover:opacity-80 transition-opacity"
-                                    >
-                                        {tag.name}
-                                    </Link>
+                                        tagId={tag.id}
+                                        tagName={tag.name}
+                                    />
                                 ))}
                             </div>
                         </div>

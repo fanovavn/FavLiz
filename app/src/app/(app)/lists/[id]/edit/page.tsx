@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getList } from "@/lib/list-actions";
-import { ListForm } from "@/components/list-form";
+import { ListEditClient } from "@/components/list-edit-client";
 
 interface EditListPageProps {
     params: Promise<{ id: string }>;
@@ -13,13 +13,22 @@ export default async function EditListPage({ params }: EditListPageProps) {
     if (!list) notFound();
 
     return (
-        <ListForm
-            mode="edit"
-            initialData={{
+        <ListEditClient
+            list={{
                 id: list.id,
                 name: list.name,
                 description: list.description,
+                thumbnail: list.thumbnail,
                 viewMode: list.viewMode,
+                sortMode: list.sortMode,
+                itemOrder: list.itemOrder,
+                items: list.items.map((item) => ({
+                    id: item.id,
+                    title: item.title,
+                    description: item.description,
+                    thumbnail: item.thumbnail,
+                    tags: item.tags,
+                })),
             }}
         />
     );

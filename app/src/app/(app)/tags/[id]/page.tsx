@@ -26,7 +26,7 @@ export default async function TagDetailPage({ params }: TagDetailPageProps) {
     if (!tag) notFound();
 
     return (
-        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-6xl">
+        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-[1280px] mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8">
                 <div className="flex items-center gap-3">

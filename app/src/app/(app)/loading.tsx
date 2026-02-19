@@ -1,6 +1,6 @@
 export default function AppLoading() {
     return (
-        <div className="px-6 md:px-10 py-8 max-w-6xl animate-pulse">
+        <div className="px-6 md:px-10 py-8 max-w-[1280px] mx-auto animate-pulse">
             {/* Header skeleton */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">

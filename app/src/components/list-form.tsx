@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -10,8 +10,11 @@ import {
     Lock,
     Globe,
     Loader2,
+    ImagePlus,
+    Trash2,
 } from "lucide-react";
 import { createList, updateList } from "@/lib/list-actions";
+import { getThumbnailColor, getInitials } from "@/lib/utils";
 
 interface ListFormProps {
     mode: "create" | "edit";
@@ -19,6 +22,7 @@ interface ListFormProps {
         id: string;
         name: string;
         description?: string | null;
+        thumbnail?: string | null;
         viewMode: string;
     };
 }
@@ -27,14 +31,71 @@ export function ListForm({ mode, initialData }: ListFormProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [name, setName] = useState(initialData?.name || "");
     const [description, setDescription] = useState(
         initialData?.description || ""
     );
+    const [thumbnail, setThumbnail] = useState<string | null>(
+        initialData?.thumbnail || null
+    );
+    const [uploadingImage, setUploadingImage] = useState(false);
     const [viewMode, setViewMode] = useState<"PRIVATE" | "PUBLIC">(
         (initialData?.viewMode as "PRIVATE" | "PUBLIC") || "PRIVATE"
     );
+
+    const handleImageUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError("File quá lớn. Tối đa 5MB.");
+            return;
+        }
+        if (
+            !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
+                file.type
+            )
+        ) {
+            setError(
+                "Định dạng không hợp lệ. Chỉ chấp nhận JPEG, PNG, WebP, GIF."
+            );
+            return;
+        }
+
+        setUploadingImage(true);
+        setError("");
+
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                setError(data.error || "Upload thất bại.");
+                return;
+            }
+
+            setThumbnail(data.url);
+        } catch {
+            setError("Có lỗi xảy ra khi upload ảnh.");
+        } finally {
+            setUploadingImage(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
+    const removeThumbnail = () => {
+        setThumbnail(null);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -50,6 +111,7 @@ export function ListForm({ mode, initialData }: ListFormProps) {
             const data = {
                 name: name.trim(),
                 description: description.trim() || undefined,
+                thumbnail: thumbnail || undefined,
                 viewMode,
             };
 
@@ -71,8 +133,16 @@ export function ListForm({ mode, initialData }: ListFormProps) {
         }
     };
 
+    // Preview color for the default avatar
+    const previewColor = name.trim()
+        ? getThumbnailColor(name.trim())
+        : "linear-gradient(135deg, #94A3B8, #CBD5E1)";
+    const previewInitials = name.trim()
+        ? getInitials(name.trim())
+        : "FL";
+
     return (
-        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-3xl">
+        <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-[1280px] mx-auto">
             {/* Header */}
             <div className="flex items-center gap-3 mb-8">
                 <Link
@@ -116,6 +186,148 @@ export function ListForm({ mode, initialData }: ListFormProps) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Hidden file input */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                />
+
+                {/* Thumbnail */}
+                <div>
+                    <label
+                        className="flex items-center gap-2 text-sm font-medium mb-3"
+                        style={{ color: "var(--muted)" }}
+                    >
+                        <ImagePlus className="w-4 h-4" />
+                        Hình đại diện
+                    </label>
+                    <div className="flex items-center gap-5">
+                        {/* Preview */}
+                        {thumbnail ? (
+                            <div
+                                className="relative overflow-hidden group shrink-0"
+                                style={{
+                                    borderRadius: "var(--radius-lg)",
+                                    border: "1px solid var(--card-border)",
+                                    width: "100px",
+                                    height: "100px",
+                                }}
+                            >
+                                <img
+                                    src={thumbnail}
+                                    alt="Thumbnail"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div
+                                    className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    style={{
+                                        background: "rgba(0,0,0,0.45)",
+                                    }}
+                                >
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            fileInputRef.current?.click()
+                                        }
+                                        className="w-8 h-8 flex items-center justify-center cursor-pointer"
+                                        style={{
+                                            borderRadius:
+                                                "var(--radius-sm)",
+                                            background:
+                                                "rgba(255,255,255,0.9)",
+                                            color: "#334155",
+                                            border: "none",
+                                        }}
+                                    >
+                                        <ImagePlus className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={removeThumbnail}
+                                        className="w-8 h-8 flex items-center justify-center cursor-pointer"
+                                        style={{
+                                            borderRadius:
+                                                "var(--radius-sm)",
+                                            background:
+                                                "rgba(239, 68, 68, 0.9)",
+                                            color: "#fff",
+                                            border: "none",
+                                        }}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div
+                                className="shrink-0 flex items-center justify-center"
+                                style={{
+                                    width: "100px",
+                                    height: "100px",
+                                    borderRadius: "var(--radius-lg)",
+                                    background: previewColor,
+                                }}
+                            >
+                                <span className="text-white font-bold text-xl">
+                                    {previewInitials}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Upload button + hint */}
+                        <div>
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    fileInputRef.current?.click()
+                                }
+                                disabled={uploadingImage}
+                                className="text-sm font-medium flex items-center gap-2 px-4 py-2.5 cursor-pointer transition-all mb-2"
+                                style={{
+                                    borderRadius: "var(--radius-md)",
+                                    border: "1px solid rgba(226,232,240,0.8)",
+                                    background: "rgba(255,255,255,0.6)",
+                                    color: "var(--muted)",
+                                }}
+                            >
+                                {uploadingImage ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Đang upload...
+                                    </>
+                                ) : (
+                                    <>
+                                        <ImagePlus className="w-4 h-4" />
+                                        {thumbnail
+                                            ? "Đổi hình"
+                                            : "Tải hình lên"}
+                                    </>
+                                )}
+                            </button>
+                            <p
+                                className="text-xs"
+                                style={{ color: "var(--muted-light)" }}
+                            >
+                                Tối đa 5MB · JPG, PNG, WebP
+                            </p>
+                            {!thumbnail && (
+                                <p
+                                    className="text-xs mt-1"
+                                    style={{
+                                        color: "var(--muted-light)",
+                                    }}
+                                >
+                                    Nếu bỏ trống, sẽ dùng hình mặc định
+                                    giống ảnh item
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
                 {/* Name */}
                 <div>
                     <label

@@ -32,7 +32,11 @@
     },
     "dashboard": {
         "greeting": "Hello, {name} 👋",
+        "greetingMorning": "Good morning, {name}",
+        "greetingAfternoon": "Good afternoon, {name}",
+        "greetingEvening": "Good evening, {name}",
         "subtitle": "Overview of your collection",
+        "heroSummary": "You have {items} {itemLabel} in {lists} collections",
         "collections": "Collections",
         "recentlyAdded": "Recently added",
         "quickActions": "Quick actions",
@@ -41,7 +45,18 @@
         "manageCollections": "Manage Collections",
         "manageTags": "Manage Tags",
         "noItemsYet": "No {item} yet. Start adding now!",
-        "addItem": "Add {item}"
+        "addItem": "Add {item}",
+        "thisWeek": "this week",
+        "weeklyActivity": "Activity this week",
+        "totalAdded": "{count} added",
+        "tagDistribution": "Tag distribution",
+        "featuredCollections": "Featured collections",
+        "popularTags": "Popular tags",
+        "tipTitle": "💡 Tip: Use Tags for faster categorization",
+        "tipDesc": "Tag your items for quick search and filtering. Try creating tags by type, topic, or priority.",
+        "tryNow": "Try now",
+        "items2": "{count} items",
+        "noData": "No data yet"
     },
     "items": {
         "title": "Items",
@@ -90,7 +105,13 @@
         "itemCount": "{count} {item}",
         "noItemsInList": "No {item}",
         "noItemsInListDesc": "Add {item} to this collection when creating or editing",
-        "addItemToList": "Add {item}"
+        "addItemToList": "Add {item}",
+        "searchPlaceholder": "Search collections...",
+        "uncategorized": "Uncategorized",
+        "uncategorizedDesc": "{item} not assigned to any collection",
+        "totalItems": "Total {item}",
+        "publicCount": "Public",
+        "createNewHint": "Group {item} by topic"
     },
     "listForm": {
         "createTitle": "Create new collection",
@@ -198,5 +219,46 @@
         "title": "404",
         "message": "Page not found",
         "backHome": "Back to home"
+    },
+    "onboarding": {
+        "step": "Step {current} / {total}",
+        "step1Label": "Welcome to FavLiz",
+        "step1Title": "Save everything you love",
+        "step1Desc": "FavLiz helps you save and organize everything you love — from recipes, travel spots, to useful links. Everything in one place, neat and easy to find.",
+        "step1Button": "Start exploring",
+        "step2Label": "Hello!",
+        "step2Title": "What should we call you? 👋",
+        "step2Desc": "Enter your name or nickname so we can personalize your experience.",
+        "step2Placeholder": "E.g.: Alex, Meow, Boss...",
+        "step2Preview": "Hello, {name}! Nice to meet you 🎉",
+        "step3Label": "Customize collection",
+        "step3Title": "What do you like to save? ✨",
+        "step3Desc": "Name your storage — or pick a suggestion below.",
+        "step3Placeholder": "E.g.: Recipes, Places, Links...",
+        "step3Chips": [
+            "Recipes",
+            "Places",
+            "Cool Links",
+            "Photos",
+            "Meoz ^^"
+        ],
+        "step3PreviewLabel": "Preview:",
+        "step4Label": "Theme",
+        "step4Title": "What color theme do you like? 🎨",
+        "step4Desc": "Choose the main color for your space.",
+        "step4Custom": "Pick custom color",
+        "step4CustomHide": "Hide custom color",
+        "step4CustomLabel": "Custom color",
+        "step5Label": "All done",
+        "step5Title": "You're all set! 🎉",
+        "step5Desc": "Everything is set up. Start saving the things you love!",
+        "step5Name": "Your name",
+        "step5Collection": "Collection",
+        "step5Color": "Theme color",
+        "step5Button": "Start using ✨",
+        "back": "Back",
+        "skip": "Skip",
+        "next": "Continue",
+        "skipToast": "You can customize later in Settings"
     }
 }

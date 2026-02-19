@@ -17,7 +17,8 @@ model User {
   avatar     String?
   themeColor String?
   itemsLabel String?
-  language   String   @default("vi")
+  language           String   @default("vi")
+  onboardingComplete Boolean  @default(false)
   role       Role     @default(USER)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -89,6 +90,8 @@ model List {
   description String?
   thumbnail   String?
   viewMode    ViewMode @default(PRIVATE)
+  sortMode    String   @default("NEWEST") // NEWEST | CUSTOM
+  itemOrder   String[] @default([])       // ordered item IDs for custom sort
   shareSlug   String?  @unique
   isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())

@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { SUPPORTED_LOCALES, type Locale } from "@/lib/i18n";
 
 async function getAuthUserId(): Promise<string> {
@@ -41,6 +42,7 @@ export async function getProfile() {
             themeColor: true,
             itemsLabel: true,
             language: true,
+            onboardingComplete: true,
         },
     });
     if (!user) redirect("/login");
@@ -228,5 +230,86 @@ export async function getLanguage(): Promise<Locale> {
         select: { language: true },
     });
     return (user?.language as Locale) || "vi";
+}
+
+// ─── ONBOARDING ─────────────────────────────────────────────
+
+export async function completeOnboarding(data: {
+    name?: string;
+    itemsLabel?: string;
+    themeColor?: string;
+}) {
+    const userId = await getAuthUserId();
+
+    const updateData: Record<string, unknown> = {
+        onboardingComplete: true,
+    };
+
+    if (data.name && data.name.trim()) {
+        updateData.name = data.name.trim();
+    }
+    if (data.itemsLabel && data.itemsLabel.trim()) {
+        updateData.itemsLabel = data.itemsLabel.trim();
+    }
+    if (data.themeColor) {
+        updateData.themeColor = data.themeColor;
+    }
+
+    // Auto-generate username slug from name if user doesn't have one yet
+    if (data.name && data.name.trim()) {
+        const currentUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { username: true },
+        });
+
+        if (!currentUser?.username) {
+            const slug = generateUsernameSlug(data.name.trim());
+            // Try to find a unique username (retry with new suffix if collision)
+            let username = slug;
+            let attempts = 0;
+            while (attempts < 5) {
+                const existing = await prisma.user.findUnique({
+                    where: { username },
+                });
+                if (!existing) break;
+                // Collision — regenerate with a new random suffix
+                username = generateUsernameSlug(data.name.trim());
+                attempts++;
+            }
+            if (attempts < 5) {
+                updateData.username = username;
+            }
+        }
+    }
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+    });
+
+    // Force layout to re-fetch user data (themeColor, itemsLabel, etc.)
+    revalidatePath("/", "layout");
+
+    return { success: true };
+}
+
+/**
+ * Generate a username slug from a display name.
+ * Strips Vietnamese diacritics, lowercases, replaces spaces with hyphens,
+ * and appends a random 4-digit suffix.
+ * e.g. "Đồng Tiến" → "dong-tien-3121"
+ */
+function generateUsernameSlug(name: string): string {
+    const base = name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // strip diacritics
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "d")
+        .replace(/[^a-z0-9]+/g, "-")     // non-alphanumeric → hyphen
+        .replace(/^-|-$/g, "");           // trim leading/trailing hyphens
+
+    const suffix = Math.floor(1000 + Math.random() * 9000); // random 4-digit number
+    return base ? `${base}-${suffix}` : `user-${suffix}`;
 }
 

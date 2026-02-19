@@ -49,30 +49,93 @@ function generateSlug(title: string): string {
 export async function getDashboardStats() {
     const userId = await getAuthUserId();
 
-    const [itemsCount, listsCount, tagsCount, publicCount, recentItems] =
-        await Promise.all([
-            prisma.item.count({ where: { userId } }),
-            prisma.list.count({ where: { userId } }),
-            prisma.tag.count({ where: { userId } }),
-            prisma.item.count({ where: { userId, viewMode: "PUBLIC" } }),
-            prisma.item.findMany({
-                where: { userId },
-                orderBy: { createdAt: "desc" },
-                take: 5,
-                include: {
-                    tags: { select: { id: true, name: true } },
-                },
-            }),
-        ]);
+    const now = new Date();
+    const weekAgo = new Date(now);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const [
+        itemsCount, listsCount, tagsCount, publicCount,
+        recentItems, itemsThisWeek, weeklyItems,
+        topTags, featuredLists,
+    ] = await Promise.all([
+        prisma.item.count({ where: { userId } }),
+        prisma.list.count({ where: { userId } }),
+        prisma.tag.count({ where: { userId } }),
+        prisma.item.count({ where: { userId, viewMode: "PUBLIC" } }),
+        prisma.item.findMany({
+            where: { userId },
+            orderBy: { createdAt: "desc" },
+            take: 5,
+            include: {
+                tags: { select: { id: true, name: true } },
+            },
+        }),
+        // Items added this week (for KPI delta)
+        prisma.item.count({
+            where: { userId, createdAt: { gte: weekAgo } },
+        }),
+        // Items created in last 7 days grouped by day (for bar chart)
+        prisma.item.findMany({
+            where: { userId, createdAt: { gte: weekAgo } },
+            select: { createdAt: true },
+            orderBy: { createdAt: "asc" },
+        }),
+        // Top tags with item counts
+        prisma.tag.findMany({
+            where: { userId },
+            include: { _count: { select: { items: true } } },
+            orderBy: { items: { _count: "desc" } },
+            take: 6,
+        }),
+        // Featured collections
+        prisma.list.findMany({
+            where: { userId },
+            include: { _count: { select: { items: true } } },
+            orderBy: { items: { _count: "desc" } },
+            take: 3,
+        }),
+    ]);
+
+    // Build 7-day activity data
+    const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+    const weeklyActivity: { day: string; date: string; count: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split("T")[0];
+        const count = weeklyItems.filter(
+            (item) => item.createdAt.toISOString().split("T")[0] === dateStr
+        ).length;
+        weeklyActivity.push({
+            day: dayNames[d.getDay()],
+            date: dateStr,
+            count,
+        });
+    }
 
     return {
         itemsCount,
         listsCount,
         tagsCount,
         publicCount,
+        itemsThisWeek,
+        weeklyActivity,
+        topTags: topTags.map((tag) => ({
+            id: tag.id,
+            name: tag.name,
+            count: tag._count.items,
+        })),
+        featuredLists: featuredLists.map((list) => ({
+            id: list.id,
+            name: list.name,
+            thumbnail: list.thumbnail,
+            itemCount: list._count.items,
+        })),
         recentItems: recentItems.map((item) => ({
             id: item.id,
             title: item.title,
+            description: item.description,
+            thumbnail: item.thumbnail,
             viewMode: item.viewMode,
             createdAt: item.createdAt.toISOString(),
             tags: item.tags,

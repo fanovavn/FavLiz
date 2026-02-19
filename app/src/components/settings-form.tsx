@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { updateProfile, changePassword, updateThemeColor, updateItemsLabel, updateLanguage } from "@/lib/user-actions";
 import { LOCALE_NAMES, LOCALE_FLAGS, SUPPORTED_LOCALES, type Locale } from "@/lib/i18n";
 import {
@@ -16,8 +16,11 @@ import {
     RotateCcw,
     Bookmark,
     Globe,
+    Bell,
+    Type,
+    ChevronDown,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 
 interface SettingsFormProps {
@@ -50,9 +53,48 @@ const PRESET_COLORS = [
 
 const DEFAULT_PRIMARY = "#DB2777";
 
+type TabId = "profile" | "password" | "theme" | "label" | "language" | "notifications";
+
+const VALID_TABS: TabId[] = ["profile", "password", "theme", "label", "language", "notifications"];
+
+const TABS: { id: TabId; icon: React.ReactNode; label: string }[] = [
+    { id: "profile", icon: <User className="w-[18px] h-[18px]" />, label: "Thông tin cá nhân" },
+    { id: "password", icon: <Lock className="w-[18px] h-[18px]" />, label: "Đổi mật khẩu" },
+    { id: "theme", icon: <Palette className="w-[18px] h-[18px]" />, label: "Màu giao diện" },
+    { id: "label", icon: <Type className="w-[18px] h-[18px]" />, label: "Tên mục Items" },
+    { id: "language", icon: <Globe className="w-[18px] h-[18px]" />, label: "Ngôn ngữ" },
+    { id: "notifications", icon: <Bell className="w-[18px] h-[18px]" />, label: "Thông báo" },
+];
+
+const SECTION_HEADERS: Record<TabId, { icon: React.ReactNode; title: string; subtitle: string }> = {
+    profile: { icon: <User className="w-5 h-5" />, title: "Thông tin cá nhân", subtitle: "Chỉnh sửa thông tin cá nhân" },
+    password: { icon: <Lock className="w-5 h-5" />, title: "Đổi mật khẩu", subtitle: "Cập nhật mật khẩu đăng nhập" },
+    theme: { icon: <Palette className="w-5 h-5" />, title: "Màu giao diện", subtitle: "Chọn màu chủ đạo cho ứng dụng" },
+    label: { icon: <Type className="w-5 h-5" />, title: "Tên mục Items", subtitle: "Tùy chỉnh tên hiển thị cho mục" },
+    language: { icon: <Globe className="w-5 h-5" />, title: "Ngôn ngữ", subtitle: "Chọn ngôn ngữ giao diện" },
+    notifications: { icon: <Bell className="w-5 h-5" />, title: "Thông báo", subtitle: "Cài đặt thông báo ứng dụng" },
+};
+
 export function SettingsForm({ profile }: SettingsFormProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { t } = useLanguage();
+
+    // Read initial tab from URL ?tab= parameter
+    const initialTab = searchParams.get("tab") as TabId | null;
+    const [activeTab, setActiveTab] = useState<TabId>(
+        initialTab && VALID_TABS.includes(initialTab) ? initialTab : "profile"
+    );
+
+    const switchTab = useCallback((tab: TabId) => {
+        setActiveTab(tab);
+        setMobileMenuOpen(false);
+        const url = new URL(window.location.href);
+        url.searchParams.set("tab", tab);
+        window.history.replaceState({}, "", url.toString());
+    }, []);
+
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // ─── Profile State ─────────────────────────────────────
     const [name, setName] = useState(profile.name || "");
@@ -146,7 +188,6 @@ export function SettingsForm({ profile }: SettingsFormProps) {
     // ─── Theme Color Apply ─────────────────────────────────
     const applyColorLive = (hex: string) => {
         setThemeColor(hex);
-        // Apply immediately to preview
         const root = document.documentElement;
         const hsl = hexToHSL(hex);
         const lightHex = hslToHex(hsl.h, Math.max(0, hsl.s - 10), Math.min(100, hsl.l + 18));
@@ -224,702 +265,723 @@ export function SettingsForm({ profile }: SettingsFormProps) {
     const itemsLabelWordCount = itemsLabelVal.trim() ? itemsLabelWords.length : 0;
     const itemsLabelValid = itemsLabelWordCount <= 4 && itemsLabelWords.every(w => w.length <= 20);
 
+    const header = SECTION_HEADERS[activeTab];
+
     // ─── Render ────────────────────────────────────────────
     return (
-        <div className="space-y-10">
-            {/* ══════════════════════════════════════════════════
-                SECTION 1: Profile Info
-            ══════════════════════════════════════════════════ */}
-            <form onSubmit={handleProfileSubmit}>
-                <div
-                    className="glass-card p-6 space-y-5"
-                    style={{ border: "1px solid rgba(226,232,240,0.6)" }}
-                >
-                    <h2
-                        className="text-base font-bold flex items-center gap-2 pb-3"
-                        style={{
-                            color: "#1E293B",
-                            borderBottom: "1px solid rgba(226,232,240,0.5)",
-                        }}
-                    >
-                        <User className="w-4 h-4" style={{ color: "var(--primary)" }} />
-                        {t("settings.profileSection")}
-                    </h2>
-
-                    {/* Email */}
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-medium mb-2" style={{ color: "var(--muted)" }}>
-                            📧 Email
-                        </label>
-                        <input
-                            type="text"
-                            value={profile.email}
-                            disabled
-                            className="w-full px-4 py-3 text-sm"
-                            style={{
-                                borderRadius: "var(--radius-md)",
-                                border: "1.5px solid rgba(226,232,240,0.8)",
-                                background: "rgba(241,245,249,0.5)",
-                                color: "var(--muted-light)",
-                            }}
-                        />
-                    </div>
-
-                    {/* Display Name */}
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-medium mb-2" style={{ color: "var(--muted)" }}>
-                            <User className="w-4 h-4" />
-                            {t("settings.nameLabel")}
-                        </label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="VD: Lisa"
-                            className="w-full px-4 py-3 text-sm transition-all"
-                            style={{
-                                borderRadius: "var(--radius-md)",
-                                border: "1.5px solid rgba(226,232,240,0.8)",
-                                background: "rgba(255,255,255,0.8)",
-                                color: "#1E293B",
-                                outline: "none",
-                            }}
-                            onFocus={(e) => {
-                                e.target.style.borderColor = "var(--primary-light)";
-                                e.target.style.boxShadow = "0 0 0 3px rgba(219,39,119,0.08)";
-                            }}
-                            onBlur={(e) => {
-                                e.target.style.borderColor = "rgba(226,232,240,0.8)";
-                                e.target.style.boxShadow = "none";
-                            }}
-                        />
-                    </div>
-
-                    {/* Username */}
-                    <div>
-                        <label className="flex items-center gap-2 text-sm font-medium mb-2" style={{ color: "var(--muted)" }}>
-                            <AtSign className="w-4 h-4" />
-                            {t("settings.usernameLabel")}
-                        </label>
-                        <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium" style={{ color: "var(--muted-light)" }}>@</span>
-                            <input
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ""))}
-                                placeholder="lisa"
-                                className="w-full pl-8 pr-4 py-3 text-sm transition-all"
-                                style={{
-                                    borderRadius: "var(--radius-md)",
-                                    border: `1.5px solid ${!usernameValid ? "#EF4444" : "rgba(226,232,240,0.8)"}`,
-                                    background: "rgba(255,255,255,0.8)",
-                                    color: "#1E293B",
-                                    outline: "none",
-                                }}
-                                onFocus={(e) => {
-                                    if (usernameValid) {
-                                        e.target.style.borderColor = "var(--primary-light)";
-                                        e.target.style.boxShadow = "0 0 0 3px rgba(219,39,119,0.08)";
-                                    }
-                                }}
-                                onBlur={(e) => {
-                                    e.target.style.borderColor = !usernameValid ? "#EF4444" : "rgba(226,232,240,0.8)";
-                                    e.target.style.boxShadow = "none";
-                                }}
-                            />
-                        </div>
-                        {!usernameValid && username && (
-                            <p className="text-xs mt-1.5 flex items-center gap-1" style={{ color: "#EF4444" }}>
-                                <AlertCircle className="w-3 h-3" />
-                                Chỉ chữ thường, số, dấu chấm, gạch ngang (3-30 ký tự)
-                            </p>
-                        )}
-                        {previewUrl && usernameValid && (
-                            <p className="text-xs mt-1.5" style={{ color: "var(--primary)" }}>
-                                🔗 URL chia sẻ: <span className="font-medium">{previewUrl}</span>
-                            </p>
-                        )}
-                        <p className="text-xs mt-1" style={{ color: "var(--muted-light)" }}>
-                            Username dùng để tạo link chia sẻ SEO-friendly. Để trống nếu không cần.
-                        </p>
-                    </div>
-
-                    {/* Message */}
-                    {message && (
-                        <MessageBanner type={message.type} text={message.text} />
-                    )}
-
-                    {/* Submit */}
-                    <button
-                        type="submit"
-                        disabled={saving || !usernameValid}
-                        className="w-full py-3 text-sm font-semibold text-white transition-all cursor-pointer"
-                        style={{
-                            borderRadius: "var(--radius-md)",
-                            background: saving || !usernameValid
-                                ? "rgba(219,39,119,0.5)"
-                                : "linear-gradient(135deg, var(--primary-dark), var(--primary))",
-                            boxShadow: saving || !usernameValid ? "none" : "0 4px 15px rgba(219,39,119,0.3)",
-                            border: "none",
-                        }}
-                    >
-                        {saving ? (
-                            <span className="flex items-center justify-center gap-2">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                {t("common.loading")}
-                            </span>
-                        ) : (
-                            `💾 ${t("settings.saveProfile")}`
-                        )}
-                    </button>
-                </div>
-            </form>
-
-            {/* ══════════════════════════════════════════════════
-                SECTION 2: Change Password
-            ══════════════════════════════════════════════════ */}
-            <div
-                className="glass-card p-6"
-                style={{ border: "1px solid rgba(226,232,240,0.6)" }}
-            >
-                <h2
-                    className="text-base font-bold flex items-center gap-2 pb-3 mb-5"
-                    style={{
-                        color: "#1E293B",
-                        borderBottom: "1px solid rgba(226,232,240,0.5)",
-                    }}
-                >
-                    <Lock className="w-4 h-4" style={{ color: "var(--primary)" }} />
-                    {t("settings.passwordSection")}
-                </h2>
-
-                {!showPassword ? (
+        <div
+            className="glass-card overflow-hidden"
+            style={{ border: "1px solid rgba(226,232,240,0.6)" }}
+        >
+            <div className="flex flex-col md:flex-row min-h-[520px]">
+                {/* ── Mobile Dropdown Menu ──────────────── */}
+                <div className="md:hidden p-3">
                     <button
                         type="button"
-                        onClick={() => setShowPassword(true)}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all cursor-pointer"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all"
                         style={{
-                            borderRadius: "var(--radius-md)",
-                            background: "rgba(255,255,255,0.8)",
-                            border: "1.5px solid rgba(226,232,240,0.8)",
-                            color: "var(--muted)",
+                            background: "var(--primary)" + "08",
+                            border: "1.5px solid rgba(226,232,240,0.6)",
                         }}
                     >
-                        <Lock className="w-4 h-4" />
-                        Đổi mật khẩu
-                    </button>
-                ) : (
-                    <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                        {/* Current Password */}
-                        <div>
-                            <label className="text-sm font-medium mb-2 block" style={{ color: "var(--muted)" }}>
-                                Mật khẩu hiện tại
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showCurrentPw ? "text" : "password"}
-                                    value={currentPassword}
-                                    onChange={(e) => setCurrentPassword(e.target.value)}
-                                    required
-                                    className="w-full px-4 py-3 pr-12 text-sm"
-                                    style={{
-                                        borderRadius: "var(--radius-md)",
-                                        border: "1.5px solid rgba(226,232,240,0.8)",
-                                        background: "rgba(255,255,255,0.8)",
-                                        color: "#1E293B",
-                                        outline: "none",
-                                    }}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowCurrentPw(!showCurrentPw)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
-                                    style={{ color: "var(--muted-light)" }}
-                                >
-                                    {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* New Password */}
-                        <div>
-                            <label className="text-sm font-medium mb-2 block" style={{ color: "var(--muted)" }}>
-                                Mật khẩu mới
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showNewPw ? "text" : "password"}
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    required
-                                    minLength={6}
-                                    className="w-full px-4 py-3 pr-12 text-sm"
-                                    style={{
-                                        borderRadius: "var(--radius-md)",
-                                        border: "1.5px solid rgba(226,232,240,0.8)",
-                                        background: "rgba(255,255,255,0.8)",
-                                        color: "#1E293B",
-                                        outline: "none",
-                                    }}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowNewPw(!showNewPw)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
-                                    style={{ color: "var(--muted-light)" }}
-                                >
-                                    {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
-                            </div>
-                            <p className="text-xs mt-1" style={{ color: "var(--muted-light)" }}>
-                                Tối thiểu 6 ký tự
-                            </p>
-                        </div>
-
-                        {/* Confirm Password */}
-                        <div>
-                            <label className="text-sm font-medium mb-2 block" style={{ color: "var(--muted)" }}>
-                                Xác nhận mật khẩu mới
-                            </label>
-                            <input
-                                type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                                className="w-full px-4 py-3 text-sm"
-                                style={{
-                                    borderRadius: "var(--radius-md)",
-                                    border: `1.5px solid ${confirmPassword && confirmPassword !== newPassword ? "#EF4444" : "rgba(226,232,240,0.8)"}`,
-                                    background: "rgba(255,255,255,0.8)",
-                                    color: "#1E293B",
-                                    outline: "none",
-                                }}
-                            />
-                            {confirmPassword && confirmPassword !== newPassword && (
-                                <p className="text-xs mt-1 flex items-center gap-1" style={{ color: "#EF4444" }}>
-                                    <AlertCircle className="w-3 h-3" />
-                                    Mật khẩu xác nhận không khớp
-                                </p>
-                            )}
-                        </div>
-
-                        {passwordMessage && (
-                            <MessageBanner type={passwordMessage.type} text={passwordMessage.text} />
-                        )}
-
-                        <div className="flex items-center gap-3 pt-2">
-                            <button
-                                type="submit"
-                                disabled={changingPassword}
-                                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition-all"
-                                style={{
-                                    borderRadius: "var(--radius-md)",
-                                    background: changingPassword
-                                        ? "rgba(219,39,119,0.5)"
-                                        : "linear-gradient(135deg, var(--primary-dark), var(--primary))",
-                                    border: "none",
-                                    boxShadow: changingPassword ? "none" : "0 2px 8px rgba(219,39,119,0.2)",
-                                }}
-                            >
-                                {changingPassword ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Đang xử lý...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Lock className="w-4 h-4" />
-                                        Đổi mật khẩu
-                                    </>
-                                )}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setShowPassword(false);
-                                    setCurrentPassword("");
-                                    setNewPassword("");
-                                    setConfirmPassword("");
-                                    setPasswordMessage(null);
-                                }}
-                                className="px-4 py-2.5 text-sm font-medium cursor-pointer transition-all"
-                                style={{
-                                    borderRadius: "var(--radius-md)",
-                                    background: "transparent",
-                                    border: "1.5px solid rgba(226,232,240,0.8)",
-                                    color: "var(--muted)",
-                                }}
-                            >
-                                Hủy
-                            </button>
-                        </div>
-                    </form>
-                )}
-            </div>
-
-            {/* ══════════════════════════════════════════════════
-                SECTION 3: Theme Color
-            ══════════════════════════════════════════════════ */}
-            <div
-                className="glass-card p-6"
-                style={{ border: "1px solid rgba(226,232,240,0.6)" }}
-            >
-                <h2
-                    className="text-base font-bold flex items-center gap-2 pb-3 mb-5"
-                    style={{
-                        color: "#1E293B",
-                        borderBottom: "1px solid rgba(226,232,240,0.5)",
-                    }}
-                >
-                    <Palette className="w-4 h-4" style={{ color: "var(--primary)" }} />
-                    Màu giao diện
-                </h2>
-
-                <p className="text-sm mb-4" style={{ color: "var(--muted)" }}>
-                    Chọn màu chủ đạo cho giao diện của bạn. Màu này sẽ áp dụng cho toàn bộ ứng dụng và cả trang public.
-                </p>
-
-                {/* Preset Swatches */}
-                <div className="flex flex-wrap gap-3 mb-5">
-                    {PRESET_COLORS.map((c) => (
-                        <button
-                            key={c.hex}
-                            type="button"
-                            onClick={() => applyColorLive(c.hex)}
-                            className="group relative cursor-pointer transition-transform hover:scale-110"
-                            title={c.name}
-                            style={{ width: 40, height: 40 }}
-                        >
-                            <div
-                                className="w-full h-full flex items-center justify-center"
-                                style={{
-                                    borderRadius: "var(--radius-md)",
-                                    background: c.hex,
-                                    border: themeColor === c.hex
-                                        ? "3px solid #1E293B"
-                                        : "2px solid rgba(255,255,255,0.8)",
-                                    boxShadow: themeColor === c.hex
-                                        ? `0 0 0 2px ${c.hex}40, 0 2px 8px ${c.hex}30`
-                                        : "0 1px 3px rgba(0,0,0,0.15)",
-                                    transition: "all 0.2s ease",
-                                }}
-                            >
-                                {themeColor === c.hex && (
-                                    <Check className="w-4 h-4 text-white" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }} />
-                                )}
-                            </div>
-                            {/* Tooltip */}
-                            <span
-                                className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
-                                style={{ color: "var(--muted-light)" }}
-                            >
-                                {c.name}
+                        <span className="flex items-center gap-2.5">
+                            <span style={{ color: "var(--primary)" }}>
+                                {TABS.find(t => t.id === activeTab)?.icon}
                             </span>
-                        </button>
-                    ))}
-                </div>
-
-                {/* Custom Color Picker */}
-                <div className="flex items-center gap-4 mb-5">
-                    <label className="text-sm font-medium" style={{ color: "var(--muted)" }}>
-                        Hoặc chọn màu tùy ý:
-                    </label>
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="color"
-                            value={themeColor}
-                            onChange={(e) => applyColorLive(e.target.value)}
-                            className="w-10 h-10 cursor-pointer"
-                            style={{
-                                borderRadius: "var(--radius-md)",
-                                border: "2px solid rgba(226,232,240,0.8)",
-                                padding: 2,
-                                background: "white",
-                            }}
-                        />
-                        <span
-                            className="text-sm font-mono px-3 py-1.5"
-                            style={{
-                                borderRadius: "var(--radius-sm)",
-                                background: "rgba(241,245,249,0.6)",
-                                color: "#475569",
-                                border: "1px solid rgba(226,232,240,0.5)",
-                            }}
-                        >
-                            {themeColor.toUpperCase()}
+                            <span className="text-sm font-semibold" style={{ color: "var(--primary)" }}>
+                                {TABS.find(t => t.id === activeTab)?.label}
+                            </span>
                         </span>
-                    </div>
-                </div>
-
-                {/* Preview Bar */}
-                <div
-                    className="p-4 mb-5 flex items-center gap-3"
-                    style={{
-                        borderRadius: "var(--radius-lg)",
-                        background: `linear-gradient(135deg, ${themeColor}10, ${themeColor}18)`,
-                        border: `1.5px solid ${themeColor}25`,
-                    }}
-                >
-                    <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{ background: themeColor }}
-                    >
-                        <Palette className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-semibold" style={{ color: themeColor }}>
-                            Xem trước giao diện
-                        </p>
-                        <p className="text-xs" style={{ color: "var(--muted-light)" }}>
-                            Đây là cách giao diện sẽ hiển thị với màu bạn chọn
-                        </p>
-                    </div>
-                </div>
-
-                {themeMessage && (
-                    <div className="mb-4">
-                        <MessageBanner type={themeMessage.type} text={themeMessage.text} />
-                    </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex items-center gap-3">
-                    <button
-                        type="button"
-                        onClick={handleSaveTheme}
-                        disabled={savingTheme}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition-all"
-                        style={{
-                            borderRadius: "var(--radius-md)",
-                            background: savingTheme
-                                ? "rgba(219,39,119,0.5)"
-                                : `linear-gradient(135deg, ${themeColor}, ${themeColor}CC)`,
-                            border: "none",
-                            boxShadow: savingTheme ? "none" : `0 2px 8px ${themeColor}40`,
-                        }}
-                    >
-                        {savingTheme ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Đang lưu...
-                            </>
-                        ) : (
-                            <>
-                                <Check className="w-4 h-4" />
-                                {t("settings.saveTheme")}
-                            </>
-                        )}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleResetTheme}
-                        disabled={savingTheme}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium cursor-pointer transition-all"
-                        style={{
-                            borderRadius: "var(--radius-md)",
-                            background: "transparent",
-                            border: "1.5px solid rgba(226,232,240,0.8)",
-                            color: "var(--muted)",
-                        }}
-                    >
-                        <RotateCcw className="w-4 h-4" />
-                        Reset mặc định
-                    </button>
-                </div>
-            </div>
-
-            {/* ══════════════════════════════════════════════════
-               TÊN MỤC "ITEMS"
-               ══════════════════════════════════════════════════ */}
-            <div className="glass-card p-6">
-                <div className="flex items-center gap-3 mb-6">
-                    <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ background: "rgba(100, 116, 139, 0.08)" }}
-                    >
-                        <Bookmark className="w-5 h-5" style={{ color: "var(--primary)" }} />
-                    </div>
-                    <div>
-                        <h2 className="text-lg font-bold" style={{ color: "#1E293B" }}>
-                            Tên mục Items
-                        </h2>
-                        <p className="text-xs" style={{ color: "var(--muted)" }}>
-                            Tùy chỉnh tên hiển thị thay cho &ldquo;Items&rdquo;
-                        </p>
-                    </div>
-                </div>
-
-                {labelMessage && <MessageBanner type={labelMessage.type} text={labelMessage.text} />}
-
-                <div className="space-y-4">
-                    <div>
-                        <label
-                            className="block text-sm font-medium mb-1.5"
-                            style={{ color: "#334155" }}
-                        >
-                            Tên tùy chỉnh
-                        </label>
-                        <input
-                            type="text"
-                            className="input-glass w-full"
-                            placeholder="Ví dụ: Món ăn, Phim, Sách..."
-                            value={itemsLabelVal}
-                            onChange={(e) => setItemsLabelVal(e.target.value)}
-                            maxLength={80}
+                        <ChevronDown
+                            className="w-4 h-4 transition-transform"
+                            style={{
+                                color: "var(--muted)",
+                                transform: mobileMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
+                            }}
                         />
-                        <div className="flex justify-between mt-1">
-                            <p className="text-xs" style={{ color: itemsLabelValid ? "var(--muted-light)" : "#DC2626" }}>
-                                {itemsLabelWordCount}/4 từ {!itemsLabelValid && "— Vượt giới hạn!"}
-                            </p>
-                            <p className="text-xs" style={{ color: "var(--muted-light)" }}>
-                                Để trống = mặc định &ldquo;Items&rdquo;
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Preview */}
-                    {itemsLabelVal.trim() && (
+                    </button>
+                    {mobileMenuOpen && (
                         <div
-                            className="p-3 rounded-xl"
-                            style={{ background: "rgba(100, 116, 139, 0.04)", border: "1px solid rgba(226,232,240,0.6)" }}
+                            className="mt-1.5 rounded-xl overflow-hidden"
+                            style={{ border: "1.5px solid rgba(226,232,240,0.5)", background: "rgba(255,255,255,0.95)" }}
                         >
-                            <p className="text-xs font-medium mb-2" style={{ color: "var(--muted)" }}>Xem trước:</p>
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                    <Bookmark className="w-4 h-4" style={{ color: "var(--primary)" }} />
-                                    <span className="text-sm font-medium" style={{ color: "#334155" }}>{itemsLabelVal.trim()}</span>
-                                </div>
-                                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(100,116,139,0.1)", color: "#475569" }}>Sidebar</span>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex gap-3 mt-6">
-                    <button
-                        type="button"
-                        onClick={handleSaveLabel}
-                        disabled={savingLabel || !itemsLabelValid}
-                        className="gradient-btn text-sm"
-                    >
-                        {savingLabel ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Đang lưu...
-                            </>
-                        ) : (
-                            <>
-                                <Check className="w-4 h-4" />
-                                Lưu tên mục
-                            </>
-                        )}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleResetLabel}
-                        disabled={savingLabel}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium cursor-pointer transition-all"
-                        style={{
-                            borderRadius: "var(--radius-md)",
-                            background: "transparent",
-                            border: "1.5px solid rgba(226,232,240,0.8)",
-                            color: "var(--muted)",
-                        }}
-                    >
-                        <RotateCcw className="w-4 h-4" />
-                        Reset mặc định
-                    </button>
-                </div>
-            </div>
-
-            {/* ── Language Section ─────────────────────────────── */}
-            <div className="glass-card p-6">
-                <div className="flex items-center gap-3 mb-1">
-                    <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center"
-                        style={{ background: "rgba(37, 99, 235, 0.08)" }}
-                    >
-                        <Globe className="w-[18px] h-[18px]" style={{ color: "#2563EB" }} />
-                    </div>
-                    <div>
-                        <h2 className="text-lg font-semibold" style={{ color: "#1E293B" }}>
-                            Ngôn ngữ giao diện
-                        </h2>
-                        <p className="text-sm" style={{ color: "var(--muted)" }}>
-                            Chọn ngôn ngữ hiển thị cho ứng dụng
-                        </p>
-                    </div>
-                </div>
-
-                <div className="mt-5 grid grid-cols-3 gap-3">
-                    {SUPPORTED_LOCALES.map((loc) => {
-                        const isSelected = language === loc;
-                        return (
-                            <button
-                                key={loc}
-                                type="button"
-                                disabled={savingLanguage}
-                                onClick={async () => {
-                                    if (loc === language) return;
-                                    setSavingLanguage(true);
-                                    setLanguageMessage(null);
-                                    try {
-                                        const result = await updateLanguage(loc);
-                                        if (result.error) {
-                                            setLanguageMessage({ type: "error", text: result.error });
-                                        } else {
-                                            setLanguageVal(loc);
-                                            setLanguageMessage({ type: "success", text: "Đã thay đổi ngôn ngữ!" });
-                                            router.refresh();
-                                        }
-                                    } catch {
-                                        setLanguageMessage({ type: "error", text: "Có lỗi xảy ra." });
-                                    } finally {
-                                        setSavingLanguage(false);
-                                    }
-                                }}
-                                className="relative flex flex-col items-center gap-2 p-4 rounded-xl cursor-pointer transition-all"
-                                style={{
-                                    border: isSelected
-                                        ? "2px solid var(--primary)"
-                                        : "2px solid rgba(226,232,240,0.6)",
-                                    background: isSelected
-                                        ? "rgba(var(--primary-rgb, 219, 39, 119), 0.04)"
-                                        : "rgba(255,255,255,0.5)",
-                                    boxShadow: isSelected
-                                        ? "0 2px 8px rgba(var(--primary-rgb, 219, 39, 119), 0.15)"
-                                        : "none",
-                                }}
-                            >
-                                <span className="text-2xl">{LOCALE_FLAGS[loc]}</span>
-                                <span
-                                    className="text-sm font-medium"
-                                    style={{
-                                        color: isSelected ? "var(--primary)" : "#475569",
-                                    }}
-                                >
-                                    {LOCALE_NAMES[loc]}
-                                </span>
-                                {isSelected && (
-                                    <div
-                                        className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
+                            {TABS.map((tab) => {
+                                const isActive = activeTab === tab.id;
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        type="button"
+                                        onClick={() => switchTab(tab.id)}
+                                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium cursor-pointer transition-all"
                                         style={{
-                                            background: "var(--primary)",
+                                            background: isActive ? "var(--primary)" + "0A" : "transparent",
+                                            color: isActive ? "var(--primary)" : "#64748B",
+                                            fontWeight: isActive ? 600 : 500,
+                                            borderBottom: "1px solid rgba(226,232,240,0.3)",
                                         }}
                                     >
-                                        <Check className="w-3 h-3 text-white" />
-                                    </div>
-                                )}
+                                        <span style={{ color: isActive ? "var(--primary)" : "#94A3B8" }}>
+                                            {tab.icon}
+                                        </span>
+                                        {tab.label}
+                                        {isActive && <Check className="w-3.5 h-3.5 ml-auto" style={{ color: "var(--primary)" }} />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Desktop Sidebar Navigation ──────────────── */}
+                <nav
+                    className="hidden md:flex md:w-[220px] shrink-0 md:flex-col gap-0.5 p-3"
+                    style={{ borderRight: "1px solid rgba(226,232,240,0.4)" }}
+                >
+                    {TABS.map((tab) => {
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                onClick={() => switchTab(tab.id)}
+                                className="flex items-center gap-2.5 px-3 py-2 text-[13.5px] font-medium rounded-lg transition-all cursor-pointer whitespace-nowrap"
+                                style={{
+                                    background: isActive ? "var(--primary)" + "0F" : "transparent",
+                                    color: isActive ? "var(--primary)" : "#64748B",
+                                    fontWeight: isActive ? 600 : 500,
+                                }}
+                            >
+                                <span style={{ color: isActive ? "var(--primary)" : "#94A3B8", opacity: isActive ? 1 : 0.8 }}>
+                                    {tab.icon}
+                                </span>
+                                {tab.label}
                             </button>
                         );
                     })}
-                </div>
+                </nav>
 
-                {languageMessage && (
-                    <div className="mt-4">
-                        <MessageBanner type={languageMessage.type} text={languageMessage.text} />
+                {/* ── Right Content Panel ────────────────── */}
+                <div className="flex-1 p-6 md:p-8">
+                    {/* Section Header */}
+                    <div className="flex items-center gap-3 mb-2">
+                        <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center"
+                            style={{ background: "var(--primary)" + "12" }}
+                        >
+                            <span style={{ color: "var(--primary)" }}>{header.icon}</span>
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-bold" style={{ color: "#1E293B" }}>
+                                {header.title}
+                            </h2>
+                            <p className="text-xs" style={{ color: "var(--muted)" }}>
+                                {header.subtitle}
+                            </p>
+                        </div>
                     </div>
-                )}
+                    <div className="mb-6" style={{ borderBottom: "1px solid rgba(226,232,240,0.5)" }} />
+
+                    {/* ═══ PROFILE ═══ */}
+                    {activeTab === "profile" && (
+                        <form onSubmit={handleProfileSubmit} className="space-y-5 max-w-lg">
+                            {/* Email */}
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium mb-2" style={{ color: "var(--muted)" }}>
+                                    📧 Email
+                                </label>
+                                <input
+                                    type="text"
+                                    value={profile.email}
+                                    disabled
+                                    className="w-full px-4 py-3 text-sm"
+                                    style={{
+                                        borderRadius: "var(--radius-md)",
+                                        border: "1.5px solid rgba(226,232,240,0.8)",
+                                        background: "rgba(241,245,249,0.5)",
+                                        color: "var(--muted-light)",
+                                    }}
+                                />
+                                <p className="text-xs mt-1" style={{ color: "var(--muted-light)" }}>
+                                    Email không thể thay đổi
+                                </p>
+                            </div>
+
+                            {/* Display Name */}
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium mb-2" style={{ color: "var(--muted)" }}>
+                                    <User className="w-4 h-4" />
+                                    {t("settings.nameLabel")}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="VD: Lisa"
+                                    className="w-full px-4 py-3 text-sm transition-all"
+                                    style={{
+                                        borderRadius: "var(--radius-md)",
+                                        border: "1.5px solid rgba(226,232,240,0.8)",
+                                        background: "rgba(255,255,255,0.8)",
+                                        color: "#1E293B",
+                                        outline: "none",
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.borderColor = "var(--primary-light)";
+                                        e.target.style.boxShadow = "0 0 0 3px rgba(219,39,119,0.08)";
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = "rgba(226,232,240,0.8)";
+                                        e.target.style.boxShadow = "none";
+                                    }}
+                                />
+                            </div>
+
+                            {/* Username */}
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium mb-2" style={{ color: "var(--muted)" }}>
+                                    <AtSign className="w-4 h-4" />
+                                    {t("settings.usernameLabel")}
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium" style={{ color: "var(--muted-light)" }}>@</span>
+                                    <input
+                                        type="text"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ""))}
+                                        placeholder="lisa"
+                                        className="w-full pl-8 pr-4 py-3 text-sm transition-all"
+                                        style={{
+                                            borderRadius: "var(--radius-md)",
+                                            border: `1.5px solid ${!usernameValid ? "#EF4444" : "rgba(226,232,240,0.8)"}`,
+                                            background: "rgba(255,255,255,0.8)",
+                                            color: "#1E293B",
+                                            outline: "none",
+                                        }}
+                                        onFocus={(e) => {
+                                            if (usernameValid) {
+                                                e.target.style.borderColor = "var(--primary-light)";
+                                                e.target.style.boxShadow = "0 0 0 3px rgba(219,39,119,0.08)";
+                                            }
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.borderColor = !usernameValid ? "#EF4444" : "rgba(226,232,240,0.8)";
+                                            e.target.style.boxShadow = "none";
+                                        }}
+                                    />
+                                </div>
+                                {!usernameValid && username && (
+                                    <p className="text-xs mt-1.5 flex items-center gap-1" style={{ color: "#EF4444" }}>
+                                        <AlertCircle className="w-3 h-3" />
+                                        Chỉ chữ thường, số, dấu chấm, gạch ngang (3-30 ký tự)
+                                    </p>
+                                )}
+                                {previewUrl && usernameValid && (
+                                    <p className="text-xs mt-1.5" style={{ color: "var(--primary)" }}>
+                                        🔗 URL chia sẻ: <span className="font-medium">{previewUrl}</span>
+                                    </p>
+                                )}
+                                <p className="text-xs mt-1" style={{ color: "var(--muted-light)" }}>
+                                    Username dùng để tạo link chia sẻ SEO-friendly. Để trống nếu không cần.
+                                </p>
+                            </div>
+
+                            {message && <MessageBanner type={message.type} text={message.text} />}
+
+                            <button
+                                type="submit"
+                                disabled={saving || !usernameValid}
+                                className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white transition-all cursor-pointer"
+                                style={{
+                                    borderRadius: "var(--radius-md)",
+                                    background: saving || !usernameValid
+                                        ? "rgba(219,39,119,0.5)"
+                                        : "linear-gradient(135deg, var(--primary-dark), var(--primary))",
+                                    boxShadow: saving || !usernameValid ? "none" : "0 4px 15px rgba(219,39,119,0.3)",
+                                    border: "none",
+                                }}
+                            >
+                                {saving ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        {t("common.loading")}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Check className="w-4 h-4" />
+                                        {t("settings.saveProfile")}
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    )}
+
+                    {/* ═══ PASSWORD ═══ */}
+                    {activeTab === "password" && (
+                        <div className="max-w-lg">
+                            <p className="text-sm mb-5" style={{ color: "var(--muted)" }}>
+                                Cập nhật mật khẩu đăng nhập để bảo mật tài khoản
+                            </p>
+                            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                                {/* Current Password */}
+                                <div>
+                                    <label className="text-sm font-medium mb-2 block" style={{ color: "var(--muted)" }}>
+                                        Mật khẩu hiện tại
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type={showCurrentPw ? "text" : "password"}
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            placeholder="Nhập mật khẩu hiện tại"
+                                            required
+                                            className="w-full px-4 py-3 pr-12 text-sm"
+                                            style={{
+                                                borderRadius: "var(--radius-md)",
+                                                border: "1.5px solid rgba(226,232,240,0.8)",
+                                                background: "rgba(255,255,255,0.8)",
+                                                color: "#1E293B",
+                                                outline: "none",
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCurrentPw(!showCurrentPw)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                                            style={{ color: "var(--muted-light)" }}
+                                        >
+                                            {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* New Password */}
+                                <div>
+                                    <label className="text-sm font-medium mb-2 block" style={{ color: "var(--muted)" }}>
+                                        Mật khẩu mới
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type={showNewPw ? "text" : "password"}
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            placeholder="Nhập mật khẩu mới"
+                                            required
+                                            minLength={6}
+                                            className="w-full px-4 py-3 pr-12 text-sm"
+                                            style={{
+                                                borderRadius: "var(--radius-md)",
+                                                border: "1.5px solid rgba(226,232,240,0.8)",
+                                                background: "rgba(255,255,255,0.8)",
+                                                color: "#1E293B",
+                                                outline: "none",
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewPw(!showNewPw)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                                            style={{ color: "var(--muted-light)" }}
+                                        >
+                                            {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Confirm Password */}
+                                <div>
+                                    <label className="text-sm font-medium mb-2 block" style={{ color: "var(--muted)" }}>
+                                        Xác nhận mật khẩu mới
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        placeholder="Nhập lại mật khẩu mới"
+                                        required
+                                        className="w-full px-4 py-3 text-sm"
+                                        style={{
+                                            borderRadius: "var(--radius-md)",
+                                            border: `1.5px solid ${confirmPassword && confirmPassword !== newPassword ? "#EF4444" : "rgba(226,232,240,0.8)"}`,
+                                            background: "rgba(255,255,255,0.8)",
+                                            color: "#1E293B",
+                                            outline: "none",
+                                        }}
+                                    />
+                                    {confirmPassword && confirmPassword !== newPassword && (
+                                        <p className="text-xs mt-1 flex items-center gap-1" style={{ color: "#EF4444" }}>
+                                            <AlertCircle className="w-3 h-3" />
+                                            Mật khẩu xác nhận không khớp
+                                        </p>
+                                    )}
+                                </div>
+
+                                {passwordMessage && <MessageBanner type={passwordMessage.type} text={passwordMessage.text} />}
+
+                                <div className="flex items-center gap-3 pt-2">
+                                    <button
+                                        type="submit"
+                                        disabled={changingPassword}
+                                        className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition-all"
+                                        style={{
+                                            borderRadius: "var(--radius-md)",
+                                            background: changingPassword
+                                                ? "rgba(219,39,119,0.5)"
+                                                : "linear-gradient(135deg, var(--primary-dark), var(--primary))",
+                                            border: "none",
+                                            boxShadow: changingPassword ? "none" : "0 2px 8px rgba(219,39,119,0.2)",
+                                        }}
+                                    >
+                                        {changingPassword ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Đang xử lý...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Lock className="w-4 h-4" />
+                                                Đổi mật khẩu
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* ═══ THEME COLOR ═══ */}
+                    {activeTab === "theme" && (
+                        <div>
+                            <p className="text-sm mb-5" style={{ color: "var(--muted)" }}>
+                                Chọn màu chủ đạo cho giao diện của bạn. Màu này sẽ áp dụng cho toàn bộ ứng dụng và cả trang public.
+                            </p>
+
+                            {/* Preset Swatches */}
+                            <div className="flex flex-wrap gap-3 mb-6">
+                                {PRESET_COLORS.map((c) => (
+                                    <button
+                                        key={c.hex}
+                                        type="button"
+                                        onClick={() => applyColorLive(c.hex)}
+                                        className="group relative cursor-pointer transition-transform hover:scale-110"
+                                        title={c.name}
+                                        style={{ width: 44, height: 44 }}
+                                    >
+                                        <div
+                                            className="w-full h-full flex items-center justify-center"
+                                            style={{
+                                                borderRadius: "var(--radius-md)",
+                                                background: c.hex,
+                                                border: themeColor === c.hex
+                                                    ? "3px solid #1E293B"
+                                                    : "2px solid rgba(255,255,255,0.8)",
+                                                boxShadow: themeColor === c.hex
+                                                    ? `0 0 0 2px ${c.hex}40, 0 2px 8px ${c.hex}30`
+                                                    : "0 1px 3px rgba(0,0,0,0.15)",
+                                                transition: "all 0.2s ease",
+                                            }}
+                                        >
+                                            {themeColor === c.hex && (
+                                                <Check className="w-4 h-4 text-white" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }} />
+                                            )}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Custom Color Picker */}
+                            <div className="flex items-center gap-4 mb-6">
+                                <label className="text-sm font-medium" style={{ color: "var(--muted)" }}>
+                                    Hoặc chọn màu tùy ý:
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="color"
+                                        value={themeColor}
+                                        onChange={(e) => applyColorLive(e.target.value)}
+                                        className="w-10 h-10 cursor-pointer"
+                                        style={{
+                                            borderRadius: "var(--radius-md)",
+                                            border: "2px solid rgba(226,232,240,0.8)",
+                                            padding: 2,
+                                            background: "white",
+                                        }}
+                                    />
+                                    <span
+                                        className="text-sm font-mono px-3 py-1.5"
+                                        style={{
+                                            borderRadius: "var(--radius-sm)",
+                                            background: "rgba(241,245,249,0.6)",
+                                            color: "#475569",
+                                            border: "1px solid rgba(226,232,240,0.5)",
+                                        }}
+                                    >
+                                        {themeColor.toUpperCase()}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Preview Bar */}
+                            <div
+                                className="p-4 mb-6 flex items-center gap-3"
+                                style={{
+                                    borderRadius: "var(--radius-lg)",
+                                    background: `linear-gradient(135deg, ${themeColor}10, ${themeColor}18)`,
+                                    border: `1.5px solid ${themeColor}25`,
+                                }}
+                            >
+                                <div
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                                    style={{ background: themeColor }}
+                                >
+                                    <Palette className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold" style={{ color: themeColor }}>
+                                        Xem trước giao diện
+                                    </p>
+                                    <p className="text-xs" style={{ color: "var(--muted-light)" }}>
+                                        Đây là cách giao diện sẽ hiển thị với màu bạn chọn
+                                    </p>
+                                </div>
+                            </div>
+
+                            {themeMessage && (
+                                <div className="mb-4">
+                                    <MessageBanner type={themeMessage.type} text={themeMessage.text} />
+                                </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={handleSaveTheme}
+                                    disabled={savingTheme}
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition-all"
+                                    style={{
+                                        borderRadius: "var(--radius-md)",
+                                        background: savingTheme
+                                            ? "rgba(219,39,119,0.5)"
+                                            : `linear-gradient(135deg, ${themeColor}, ${themeColor}CC)`,
+                                        border: "none",
+                                        boxShadow: savingTheme ? "none" : `0 2px 8px ${themeColor}40`,
+                                    }}
+                                >
+                                    {savingTheme ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Đang lưu...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Check className="w-4 h-4" />
+                                            {t("settings.saveTheme")}
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleResetTheme}
+                                    disabled={savingTheme}
+                                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium cursor-pointer transition-all"
+                                    style={{
+                                        borderRadius: "var(--radius-md)",
+                                        background: "transparent",
+                                        border: "1.5px solid rgba(226,232,240,0.8)",
+                                        color: "var(--muted)",
+                                    }}
+                                >
+                                    <RotateCcw className="w-4 h-4" />
+                                    Reset mặc định
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ═══ ITEMS LABEL ═══ */}
+                    {activeTab === "label" && (
+                        <div className="max-w-lg">
+                            <p className="text-sm mb-5" style={{ color: "var(--muted)" }}>
+                                Tùy chỉnh tên hiển thị thay cho &ldquo;Items&rdquo;. Tên này sẽ xuất hiện trên sidebar và các trang liên quan.
+                            </p>
+
+                            {labelMessage && <MessageBanner type={labelMessage.type} text={labelMessage.text} />}
+
+                            <div className="space-y-4 mt-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1.5" style={{ color: "#334155" }}>
+                                        Tên tùy chỉnh
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="input-glass w-full"
+                                        placeholder="Ví dụ: Món ăn, Phim, Sách..."
+                                        value={itemsLabelVal}
+                                        onChange={(e) => setItemsLabelVal(e.target.value)}
+                                        maxLength={80}
+                                    />
+                                    <div className="flex justify-between mt-1">
+                                        <p className="text-xs" style={{ color: itemsLabelValid ? "var(--muted-light)" : "#DC2626" }}>
+                                            {itemsLabelWordCount}/4 từ {!itemsLabelValid && "— Vượt giới hạn!"}
+                                        </p>
+                                        <p className="text-xs" style={{ color: "var(--muted-light)" }}>
+                                            Để trống = mặc định &ldquo;Items&rdquo;
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Preview */}
+                                {itemsLabelVal.trim() && (
+                                    <div
+                                        className="p-3 rounded-xl"
+                                        style={{ background: "rgba(100, 116, 139, 0.04)", border: "1px solid rgba(226,232,240,0.6)" }}
+                                    >
+                                        <p className="text-xs font-medium mb-2" style={{ color: "var(--muted)" }}>Xem trước:</p>
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2">
+                                                <Bookmark className="w-4 h-4" style={{ color: "var(--primary)" }} />
+                                                <span className="text-sm font-medium" style={{ color: "#334155" }}>{itemsLabelVal.trim()}</span>
+                                            </div>
+                                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(100,116,139,0.1)", color: "#475569" }}>Sidebar</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={handleSaveLabel}
+                                    disabled={savingLabel || !itemsLabelValid}
+                                    className="gradient-btn text-sm"
+                                >
+                                    {savingLabel ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Đang lưu...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Check className="w-4 h-4" />
+                                            Lưu tên mục
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleResetLabel}
+                                    disabled={savingLabel}
+                                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium cursor-pointer transition-all"
+                                    style={{
+                                        borderRadius: "var(--radius-md)",
+                                        background: "transparent",
+                                        border: "1.5px solid rgba(226,232,240,0.8)",
+                                        color: "var(--muted)",
+                                    }}
+                                >
+                                    <RotateCcw className="w-4 h-4" />
+                                    Reset mặc định
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ═══ LANGUAGE ═══ */}
+                    {activeTab === "language" && (
+                        <div>
+                            <p className="text-sm mb-5" style={{ color: "var(--muted)" }}>
+                                Chọn ngôn ngữ hiển thị cho ứng dụng
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-3 max-w-md">
+                                {SUPPORTED_LOCALES.map((loc) => {
+                                    const isSelected = language === loc;
+                                    return (
+                                        <button
+                                            key={loc}
+                                            type="button"
+                                            disabled={savingLanguage}
+                                            onClick={async () => {
+                                                if (loc === language) return;
+                                                setSavingLanguage(true);
+                                                setLanguageMessage(null);
+                                                try {
+                                                    const result = await updateLanguage(loc);
+                                                    if (result.error) {
+                                                        setLanguageMessage({ type: "error", text: result.error });
+                                                    } else {
+                                                        setLanguageVal(loc);
+                                                        setLanguageMessage({ type: "success", text: "Đã thay đổi ngôn ngữ!" });
+                                                        router.refresh();
+                                                    }
+                                                } catch {
+                                                    setLanguageMessage({ type: "error", text: "Có lỗi xảy ra." });
+                                                } finally {
+                                                    setSavingLanguage(false);
+                                                }
+                                            }}
+                                            className="relative flex flex-col items-center gap-2 p-4 rounded-xl cursor-pointer transition-all"
+                                            style={{
+                                                border: isSelected
+                                                    ? "2px solid var(--primary)"
+                                                    : "2px solid rgba(226,232,240,0.6)",
+                                                background: isSelected
+                                                    ? "rgba(var(--primary-rgb, 219, 39, 119), 0.04)"
+                                                    : "rgba(255,255,255,0.5)",
+                                                boxShadow: isSelected
+                                                    ? "0 2px 8px rgba(var(--primary-rgb, 219, 39, 119), 0.15)"
+                                                    : "none",
+                                            }}
+                                        >
+                                            <span className="text-2xl">{LOCALE_FLAGS[loc]}</span>
+                                            <span
+                                                className="text-sm font-medium"
+                                                style={{
+                                                    color: isSelected ? "var(--primary)" : "#475569",
+                                                }}
+                                            >
+                                                {LOCALE_NAMES[loc]}
+                                            </span>
+                                            {isSelected && (
+                                                <div
+                                                    className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
+                                                    style={{ background: "var(--primary)" }}
+                                                >
+                                                    <Check className="w-3 h-3 text-white" />
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {languageMessage && (
+                                <div className="mt-4">
+                                    <MessageBanner type={languageMessage.type} text={languageMessage.text} />
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ═══ NOTIFICATIONS ═══ */}
+                    {activeTab === "notifications" && (
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                            <div
+                                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+                                style={{ background: "rgba(100, 116, 139, 0.06)" }}
+                            >
+                                <Bell className="w-8 h-8" style={{ color: "var(--muted-light)" }} />
+                            </div>
+                            <h3 className="text-lg font-semibold mb-1" style={{ color: "#1E293B" }}>
+                                Sắp ra mắt
+                            </h3>
+                            <p className="text-sm" style={{ color: "var(--muted)" }}>
+                                Tính năng thông báo đang được phát triển
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

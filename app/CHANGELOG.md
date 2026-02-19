@@ -4,6 +4,46 @@ Tất cả thay đổi đáng chú ý của **Web User** sẽ được ghi nhậ
 
 ---
 
+## [v1.2.0] — 2026-02-19
+
+### 🎉 Onboarding, Theme System & Collection Management
+
+#### ✨ Tính năng mới
+- **Onboarding Popup** — hướng dẫn người dùng mới qua 5 bước:
+  - Chào mừng → Nhập tên → Đặt tên danh mục → Chọn màu theme → Tóm tắt & hoàn tất
+  - Hình minh hoạ cho mỗi bước, validation đầy đủ
+  - Giao diện glassmorphism, animation mượt mà
+- **Tự động tạo username** — từ tên nhập ở onboarding, tự gen slug dạng `dong-tien-3121`
+  - Hỗ trợ tiếng Việt: bỏ dấu, chuyển đ→d, thêm 4 số random
+  - Tự kiểm tra trùng lặp, retry tối đa 5 lần
+- **Quản lý Bộ sưu tập (Lists)** — overhaul toàn diện:
+  - Trang listing mới: Grid view với cards có thumbnail, item count badge
+  - Nút tạo bộ sưu tập mới (modal)
+  - Trang chi tiết bộ sưu tập: hero card + grid items
+  - Trang chỉnh sửa bộ sưu tập: edit form với thumbnail upload
+  - Danh mục "Chưa phân loại" (uncategorized) — xem items chưa thuộc bộ sưu tập nào
+- **Trang Tags cải thiện** — hiển thị tag detail popup khi click tag
+- **Create List Modal** — tạo bộ sưu tập nhanh từ trang listing
+
+#### 🎨 Cải thiện giao diện
+- **Dashboard redesign** — hero banner, KPI cards, biểu đồ hoạt động tuần, phân bố tag, bộ sưu tập nổi bật, quick actions, tip banner
+- **Theme Color đồng bộ** — hero banner và tip banner trên dashboard giờ đi theo tông màu user chọn (trước đây hardcode xanh lá)
+- **Settings page** — cải thiện giao diện cài đặt cá nhân
+- **Loading state** — skeleton loading toàn app khi chuyển trang
+- **Đa ngôn ngữ** — cập nhật i18n cho tất cả ngôn ngữ (vi, en, zh, ru)
+
+#### 🐛 Sửa lỗi
+- Fix theme color không apply sau khi hoàn thành onboarding (thêm `revalidatePath`)
+- Fix UI overlap giữa hình và step badge trong onboarding popup
+- Fix hardcoded emerald colors trong dashboard hero banner và tip banner
+
+#### 🔧 Backend
+- Thêm `revalidatePath("/", "layout")` sau khi cập nhật user data → server component tự re-fetch
+- Thêm hàm `generateUsernameSlug()` — tạo username slug từ tên tiếng Việt
+- Cập nhật Prisma schema cho tính năng mới
+
+---
+
 ## [v1.1.0] — 2026-02-19
 
 ### 🔄 Redesign toàn diện Item Detail & Listing

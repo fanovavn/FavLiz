@@ -146,11 +146,10 @@ export function AttachmentViewer({ attachments }: AttachmentViewerProps) {
                             Hình ảnh
                         </p>
                         <div
-                            className="grid gap-3"
+                            className="flex gap-3"
                             style={{
-                                gridTemplateColumns: images.length === 1
-                                    ? "1fr"
-                                    : "repeat(auto-fill, minmax(200px, 1fr))",
+                                overflowX: "auto",
+                                paddingBottom: "4px",
                             }}
                         >
                             {images.map((att) => (
@@ -158,11 +157,12 @@ export function AttachmentViewer({ attachments }: AttachmentViewerProps) {
                                     key={att.id}
                                     type="button"
                                     onClick={() => setLightboxSrc(att.url)}
-                                    className="overflow-hidden cursor-pointer group relative"
+                                    className="overflow-hidden cursor-pointer group relative shrink-0"
                                     style={{
                                         borderRadius: "var(--radius-md)",
                                         border: "1.5px solid rgba(0,0,0,0.07)",
-                                        aspectRatio: "16/10",
+                                        width: "150px",
+                                        height: "150px",
                                     }}
                                 >
                                     <img
