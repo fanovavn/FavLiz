@@ -105,28 +105,40 @@ export function OnboardingPopup() {
             <div className="onboarding-overlay">
                 {/* Card */}
                 <div className="onboarding-card">
-                    {/* Image section */}
-                    <div className="onboarding-image-section">
-                        <Image
-                            src={STEP_IMAGES[step - 1]}
-                            alt={`Step ${step}`}
-                            fill
-                            style={{ objectFit: "cover" }}
-                            priority
-                        />
-                        {/* Step badge */}
-                        <div className="onboarding-step-badge">
-                            <span>{STEP_ICONS[step - 1]}</span>
-                            {t("onboarding.step", { current: step, total: TOTAL_STEPS })}
+                    {/* Skip / Close button */}
+                    <button
+                        onClick={handleFinish}
+                        className="onboarding-skip-btn"
+                        aria-label="Skip onboarding"
+                    >
+                        ✕
+                    </button>
+
+                    {/* Scrollable inner */}
+                    <div className="onboarding-card-inner">
+                        {/* Image section */}
+                        <div className="onboarding-image-section">
+                            <Image
+                                src={STEP_IMAGES[step - 1]}
+                                alt={`Step ${step}`}
+                                fill
+                                style={{ objectFit: "cover" }}
+                                priority
+                            />
+                            {/* Step badge */}
+                            <div className="onboarding-step-badge">
+                                <span>{STEP_ICONS[step - 1]}</span>
+                                {t("onboarding.step", { current: step, total: TOTAL_STEPS })}
+                            </div>
+                        </div>
+
+                        {/* Content section */}
+                        <div className="onboarding-content">
+                            {renderStepContent()}
                         </div>
                     </div>
 
-                    {/* Content section */}
-                    <div className="onboarding-content">
-                        {renderStepContent()}
-                    </div>
-
-                    {/* Progress + Navigation */}
+                    {/* Progress + Navigation — sticky footer */}
                     <div className="onboarding-footer">
                         {/* Progress dots */}
                         <div className="onboarding-progress">
@@ -195,19 +207,60 @@ export function OnboardingPopup() {
                 }
 
                 .onboarding-card {
+                    position: relative;
                     width: 100%;
                     max-width: 480px;
+                    max-height: calc(100dvh - 40px);
                     background: #fff;
                     border-radius: var(--radius-xl);
                     overflow: hidden;
                     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
                     animation: onb-popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .onboarding-skip-btn {
+                    position: absolute;
+                    top: 12px;
+                    right: 12px;
+                    z-index: 10;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    border: none;
+                    background: rgba(255, 255, 255, 0.85);
+                    backdrop-filter: blur(4px);
+                    -webkit-backdrop-filter: blur(4px);
+                    color: #666;
+                    font-size: 16px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+                    transition: all 0.2s;
+                }
+
+                .onboarding-skip-btn:hover {
+                    background: #fff;
+                    color: #333;
+                    transform: scale(1.1);
+                }
+
+                .onboarding-card-inner {
+                    flex: 1;
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                    min-height: 0;
                 }
 
                 .onboarding-image-section {
                     position: relative;
                     height: 220px;
+                    min-height: 140px;
                     overflow: hidden;
+                    flex-shrink: 0;
                 }
 
                 .onboarding-step-badge {
@@ -234,7 +287,22 @@ export function OnboardingPopup() {
                 }
 
                 .onboarding-footer {
-                    padding: 0 28px 24px;
+                    flex-shrink: 0;
+                    padding: 12px 28px 24px;
+                    background: #fff;
+                    border-top: 1px solid rgba(0, 0, 0, 0.04);
+                }
+
+                @media (max-height: 680px) {
+                    .onboarding-image-section {
+                        height: 160px;
+                    }
+                    .onboarding-content {
+                        padding: 16px 20px 12px;
+                    }
+                    .onboarding-footer {
+                        padding: 10px 20px 16px;
+                    }
                 }
 
                 .onboarding-progress {
