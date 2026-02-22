@@ -105,8 +105,15 @@ function ItemRow({ item, openTag }: { item: ItemType; openTag: (id: string, name
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                     <h3
-                        className="font-semibold text-sm truncate"
-                        style={{ color: "#334155" }}
+                        className="font-semibold text-sm"
+                        style={{
+                            color: "#334155",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            lineHeight: "1.4",
+                        }}
                     >
                         {item.title}
                     </h3>
@@ -152,18 +159,21 @@ function ItemRow({ item, openTag }: { item: ItemType; openTag: (id: string, name
                     </div>
                 </div>
 
-                {/* Badge */}
+                {/* Badge — icon only */}
                 <span
-                    className={`badge shrink-0 ${item.viewMode === "PUBLIC" ? "badge-public" : "badge-private"}`}
+                    className={`shrink-0 flex items-center justify-center ${item.viewMode === "PUBLIC" ? "badge-public" : "badge-private"}`}
+                    style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: "50%",
+                        padding: 0,
+                    }}
+                    title={item.viewMode === "PUBLIC" ? "Public" : "Private"}
                 >
                     {item.viewMode === "PUBLIC" ? (
-                        <>
-                            <Globe className="w-3 h-3" /> Public
-                        </>
+                        <Globe className="w-3.5 h-3.5" />
                     ) : (
-                        <>
-                            <Lock className="w-3 h-3" /> Private
-                        </>
+                        <Lock className="w-3.5 h-3.5" />
                     )}
                 </span>
             </div>

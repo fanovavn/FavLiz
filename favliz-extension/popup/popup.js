@@ -64,6 +64,17 @@ async function showMainView(user) {
             user.name || user.email?.split("@")[0] || "User";
     }
 
+    // Initialize FAB toggle state
+    try {
+        const stored = await chrome.storage.local.get(["fabHidden"]);
+        const fabToggle = document.getElementById("fab-toggle");
+        if (fabToggle) {
+            fabToggle.checked = !stored.fabHidden;
+        }
+    } catch (e) {
+        console.warn("[FavLiz Popup] Could not read fabHidden:", e);
+    }
+
     // Extract page data from active tab
     try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -150,11 +161,45 @@ document.getElementById("save-with-options-btn").addEventListener("click", async
     }
 });
 
+// ─── FAB Toggle ─────────────────────────────────────────────
+document.getElementById("fab-toggle").addEventListener("change", async (e) => {
+    const show = e.target.checked;
+
+    // Save preference
+    try {
+        await chrome.storage.local.set({ fabHidden: !show });
+    } catch (err) {
+        console.warn("[FavLiz Popup] Could not save fabHidden:", err);
+    }
+
+    // Notify active tab's content script
+    try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab?.id) {
+            await chrome.tabs.sendMessage(tab.id, { action: "TOGGLE_FAB", show });
+        }
+    } catch {
+        // Content script may not be injected on this tab
+    }
+});
+
 // ─── Logout ──────────────────────────────────────────────────
 document.getElementById("logout-btn").addEventListener("click", async () => {
     await sendMessage("LOGOUT");
     showView("login");
     pageData = null;
+});
+
+// ─── Open Dashboard (with session sync) ─────────────────────
+document.getElementById("open-dashboard-btn").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const result = await sendMessage("GET_DASHBOARD_URL", { redirect: "/dashboard" });
+    if (result.success && result.url) {
+        chrome.tabs.create({ url: result.url });
+    } else {
+        chrome.tabs.create({ url: "https://www.favliz.com/dashboard" });
+    }
+    window.close();
 });
 
 // ─── Helpers ─────────────────────────────────────────────────

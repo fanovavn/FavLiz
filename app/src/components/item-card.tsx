@@ -26,7 +26,7 @@ export function ItemCard({ item }: ItemCardProps) {
             <div className="glass-card glass-card-hover overflow-hidden group">
                 {/* Thumbnail */}
                 {item.thumbnail ? (
-                    <div className="w-full overflow-hidden" style={{ height: 180 }}>
+                    <div className="w-full overflow-hidden" style={{ aspectRatio: "16/10" }}>
                         <img
                             src={item.thumbnail}
                             alt={item.title}

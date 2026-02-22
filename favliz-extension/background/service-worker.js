@@ -153,6 +153,21 @@ async function handleMessage(message) {
             return { success: false, error: result.error, unauthorized: result.unauthorized };
         }
 
+        case "GET_DASHBOARD_URL": {
+            // Build a URL that syncs the extension session into the web app's cookies
+            const token = await getToken();
+            const stored = await chrome.storage.local.get(["refresh_token"]);
+            const refreshToken = stored.refresh_token;
+            const redirect = payload.redirect || "/dashboard";
+
+            if (token && refreshToken) {
+                const syncUrl = `${API_BASE}/set-session?access_token=${encodeURIComponent(token)}&refresh_token=${encodeURIComponent(refreshToken)}&redirect=${encodeURIComponent(redirect)}`;
+                return { success: true, url: syncUrl };
+            }
+            // Fallback: user not logged in, just open dashboard directly
+            return { success: true, url: `https://www.favliz.com${redirect}` };
+        }
+
         default:
             return { error: "Unknown action" };
     }

@@ -40,27 +40,73 @@
     }
 
     // ─── Create Floating Action Button ──────────────────────
-    function createFloatingButton() {
+    async function createFloatingButton() {
         if (document.getElementById(`${FAVLIZ_PREFIX}-fab`)) return;
 
         // Don't show FAB on FavLiz's own pages
         const host = window.location.hostname;
         if (host === "localhost" || host.includes("favliz.com")) return;
 
+        // Check if user has hidden the FAB
+        try {
+            const stored = await chrome.storage.local.get(["fabHidden"]);
+            if (stored.fabHidden) return;
+        } catch (e) {
+            console.warn("[FavLiz] Could not read fabHidden state:", e);
+        }
+
+        const fabWrapper = document.createElement("div");
+        fabWrapper.id = `${FAVLIZ_PREFIX}-fab-wrapper`;
+
         const fab = document.createElement("button");
         fab.id = `${FAVLIZ_PREFIX}-fab`;
         fab.title = "Save to FavLiz";
-        fab.innerHTML = `
+        const fabIconHTML = `
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
             </svg>
         `;
+        fab.innerHTML = fabIconHTML;
         fab.addEventListener("click", async () => {
-            currentExtractedData = window.FavLizExtractorRouter.extractPageData();
-            await openSaveModal(currentExtractedData);
+            // Show loading spinner
+            fab.disabled = true;
+            fab.innerHTML = `<span class="${FAVLIZ_PREFIX}-fab-spinner"></span>`;
+            try {
+                currentExtractedData = window.FavLizExtractorRouter.extractPageData();
+                await openSaveModal(currentExtractedData);
+            } finally {
+                // Restore icon
+                fab.innerHTML = fabIconHTML;
+                fab.disabled = false;
+            }
         });
 
-        document.body.appendChild(fab);
+        // Close button to hide FAB
+        const closeBtn = document.createElement("button");
+        closeBtn.id = `${FAVLIZ_PREFIX}-fab-close`;
+        closeBtn.title = "Hide floating button";
+        closeBtn.innerHTML = `
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        `;
+        closeBtn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            fabWrapper.style.opacity = "0";
+            fabWrapper.style.transform = "translateX(20px)";
+            setTimeout(() => fabWrapper.remove(), 300);
+            try {
+                await chrome.storage.local.set({ fabHidden: true });
+            } catch (err) {
+                console.warn("[FavLiz] Could not save fabHidden state:", err);
+            }
+            showToast("Floating button hidden. Re-enable it from the extension popup.", "info");
+        });
+
+        fabWrapper.appendChild(fab);
+        fabWrapper.appendChild(closeBtn);
+        document.body.appendChild(fabWrapper);
     }
 
     // ─── Inline Post Buttons ─────────────────────────────────
@@ -393,7 +439,15 @@
                         <label>Lists</label>
                         <div class="${FAVLIZ_PREFIX}-multiselect" id="${FAVLIZ_PREFIX}-lists-select">
                             <div class="${FAVLIZ_PREFIX}-selected-chips" id="${FAVLIZ_PREFIX}-lists-chips"></div>
-                            <input type="text" placeholder="Search lists..." id="${FAVLIZ_PREFIX}-lists-search" autocomplete="off" />
+                            <div class="${FAVLIZ_PREFIX}-input-row">
+                                <input type="text" placeholder="Search or create list..." id="${FAVLIZ_PREFIX}-lists-search" autocomplete="off" />
+                                <button type="button" class="${FAVLIZ_PREFIX}-add-btn" id="${FAVLIZ_PREFIX}-lists-add-btn" title="Create new list">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </button>
+                            </div>
                             <div class="${FAVLIZ_PREFIX}-dropdown" id="${FAVLIZ_PREFIX}-lists-dropdown"></div>
                         </div>
                     </div>
@@ -440,12 +494,67 @@
 
         // Lists multi-select
         const selectedListIds = new Set();
+        const listOptions = lists.map((l) => ({ id: l.id, name: l.name, meta: l.isDefault ? "(default)" : "" }));
         setupMultiSelect(
             `${FAVLIZ_PREFIX}-lists`,
-            lists.map((l) => ({ id: l.id, name: l.name, meta: l.isDefault ? "(default)" : "" })),
+            listOptions,
             selectedListIds,
             "list"
         );
+
+        // Create new list button
+        const addListBtn = document.getElementById(`${FAVLIZ_PREFIX}-lists-add-btn`);
+        const listsSearchInput = document.getElementById(`${FAVLIZ_PREFIX}-lists-search`);
+
+        async function createNewList() {
+            const name = listsSearchInput.value.trim();
+            if (!name) {
+                showToast("Enter a list name", "error");
+                listsSearchInput.focus();
+                return;
+            }
+            // Check if list already exists
+            const existing = listOptions.find((o) => o.name.toLowerCase() === name.toLowerCase());
+            if (existing) {
+                selectedListIds.add(existing.id);
+                renderChips(`${FAVLIZ_PREFIX}-lists`, selectedListIds, "list", listOptions);
+                listsSearchInput.value = "";
+                const dropdown = document.getElementById(`${FAVLIZ_PREFIX}-lists-dropdown`);
+                if (dropdown) dropdown.style.display = "none";
+                return;
+            }
+            // Show loading on button
+            addListBtn.disabled = true;
+            addListBtn.innerHTML = `<span class="${FAVLIZ_PREFIX}-spinner" style="width:14px;height:14px;border-width:2px;"></span>`;
+            const res = await sendMessage("CREATE_LIST", { name });
+            if (res.success) {
+                listOptions.push({ id: res.list.id, name });
+                selectedListIds.add(res.list.id);
+                renderChips(`${FAVLIZ_PREFIX}-lists`, selectedListIds, "list", listOptions);
+                showToast(`List "${name}" created!`, "success");
+            } else {
+                showToast(res.error || "Failed to create list", "error");
+            }
+            // Restore button
+            addListBtn.disabled = false;
+            addListBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+            listsSearchInput.value = "";
+            const dropdown = document.getElementById(`${FAVLIZ_PREFIX}-lists-dropdown`);
+            if (dropdown) dropdown.style.display = "none";
+        }
+
+        addListBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            createNewList();
+        });
+
+        listsSearchInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && listsSearchInput.value.trim()) {
+                e.preventDefault();
+                createNewList();
+            }
+        });
 
         // Tags with auto-suggestions
         const selectedTagNames = new Set(data.autoTags || []);
@@ -658,6 +767,20 @@
         } else if (message.action === "OPEN_SAVE_MODAL") {
             currentExtractedData = window.FavLizExtractorRouter.extractPageData();
             openSaveModal(currentExtractedData);
+            sendResponse({ success: true });
+        } else if (message.action === "TOGGLE_FAB") {
+            const wrapper = document.getElementById(`${FAVLIZ_PREFIX}-fab-wrapper`);
+            if (message.show) {
+                // Re-show FAB
+                if (!wrapper) {
+                    createFloatingButton();
+                }
+            } else {
+                // Hide FAB
+                if (wrapper) {
+                    wrapper.remove();
+                }
+            }
             sendResponse({ success: true });
         }
         return true;

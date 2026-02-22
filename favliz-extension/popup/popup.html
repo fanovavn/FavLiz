@@ -100,9 +100,29 @@
                 <!-- Status Messages -->
                 <div id="save-status" class="status-msg hidden"></div>
 
+                <!-- Settings -->
+                <div class="settings-section">
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path
+                                    d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42">
+                                </path>
+                            </svg>
+                            <span>Show floating button</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="fab-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Dashboard Link -->
                 <div class="footer-link">
-                    <a href="https://favliz.com/dashboard" target="_blank">
+                    <a href="#" id="open-dashboard-btn">
                         Open FavLiz Dashboard →
                     </a>
                 </div>
