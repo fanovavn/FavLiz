@@ -4,6 +4,36 @@ Tất cả thay đổi đáng chú ý của **Web User** sẽ được ghi nhậ
 
 ---
 
+## [v1.4.0] — 2026-02-22
+
+### 🌍 Đa ngôn ngữ Landing Page, Auth & Onboarding
+
+#### ✨ Tính năng mới
+- **i18n Landing Page** — toàn bộ nội dung landing page hỗ trợ 4 ngôn ngữ (🇻🇳 🇺🇸 🇨🇳 🇷🇺):
+  - Hero section, Stats, Problems, How it Works, Platforms, Use Cases
+  - Products, Comparison, Privacy, CTA, Footer
+  - Language switcher (🌐 + cờ) trên navbar cho cả desktop & mobile
+- **i18n Auth Pages** — login, register, forgot-password đều đã dịch đầy đủ:
+  - Tất cả text, placeholder, error messages, button labels
+  - Language switcher ở cuối trang, dropdown mở lên trên (dropUp)
+- **i18n Chrome Extension Button** — nút "Cài Chrome Extension" và modal "Sắp ra mắt" hiển thị đúng ngôn ngữ
+- **Onboarding tự động** — popup onboarding hiện lại khi user chưa thiết lập tên hiển thị (dù đã hoàn thành onboarding trước đó)
+
+#### 🎨 Cải thiện giao diện
+- Language switcher hỗ trợ `dropUp` prop — dropdown mở lên trên trên các trang auth để không bị che khuất
+- Layout auth footer: text + language switcher cùng một hàng, gọn gàng
+- Navbar landing: tích hợp language switcher vào cả desktop & mobile menu
+
+#### 🔧 Backend / Infrastructure
+- Thêm `src/lib/i18n/landing.json` — bản dịch riêng cho landing page (4 ngôn ngữ)
+- Thêm `src/lib/i18n/auth.json` — bản dịch riêng cho auth pages (4 ngôn ngữ)
+- Thêm `src/hooks/use-auth-locale.ts` — hook đọc locale từ cookie client-side
+- Thêm `src/lib/i18n/landing.ts` — helper function cho landing page translations
+- Locale lưu trong cookie `landing_locale`, đồng bộ giữa landing ↔ login ↔ register ↔ forgot-password
+- Cập nhật query user trong app layout: thêm field `name` để kiểm tra onboarding
+
+---
+
 ## [v1.3.0] — 2026-02-19
 
 ### 🎯 Thêm items vào bộ sưu tập & Sửa lỗi

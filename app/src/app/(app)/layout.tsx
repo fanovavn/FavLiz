@@ -26,9 +26,10 @@ export default async function AppLayout({
     // Fetch user's theme color, items label, and language
     const dbUser = await prisma.user.findUnique({
         where: { id: user.id },
-        select: { themeColor: true, itemsLabel: true, language: true, onboardingComplete: true },
+        select: { themeColor: true, itemsLabel: true, language: true, onboardingComplete: true, name: true },
     });
 
+    const showOnboarding = !dbUser?.onboardingComplete || !dbUser?.name;
     const itemsLabel = dbUser?.itemsLabel || "Items";
     const locale = (dbUser?.language as Locale) || DEFAULT_LOCALE;
 
@@ -44,7 +45,7 @@ export default async function AppLayout({
                                 {children}
                             </main>
                         </div>
-                        {!dbUser?.onboardingComplete && <OnboardingPopup />}
+                        {showOnboarding && <OnboardingPopup />}
                     </TagPopupProvider>
                 </ItemsLabelProvider>
             </LanguageProvider>

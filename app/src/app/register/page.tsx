@@ -5,11 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, Mail, Lock, Eye, EyeOff, ArrowRight, KeyRound } from "lucide-react";
 import { signUp, verifyOtp } from "@/lib/auth-actions";
+import { useAuthLocale } from "@/hooks/use-auth-locale";
+import { LandingLanguageSwitcher } from "@/components/landing-language-switcher";
 
 type Step = "credentials" | "otp";
 
 export default function RegisterPage() {
     const router = useRouter();
+    const { locale, t } = useAuthLocale();
     const [step, setStep] = useState<Step>("credentials");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -25,15 +28,15 @@ export default function RegisterPage() {
         setError("");
 
         if (!email) {
-            setError("Vui lòng nhập email");
+            setError(t.errEnterEmail);
             return;
         }
         if (password.length < 6) {
-            setError("Mật khẩu phải có ít nhất 6 ký tự");
+            setError(t.errPasswordMin);
             return;
         }
         if (password !== confirmPassword) {
-            setError("Mật khẩu không khớp");
+            setError(t.errPasswordMatch);
             return;
         }
 
@@ -46,7 +49,7 @@ export default function RegisterPage() {
             }
             setStep("otp");
         } catch {
-            setError("Có lỗi xảy ra. Vui lòng thử lại.");
+            setError(t.errGeneral);
         } finally {
             setLoading(false);
         }
@@ -57,7 +60,7 @@ export default function RegisterPage() {
         setError("");
 
         if (otp.length !== 6) {
-            setError("Mã OTP phải có 6 chữ số");
+            setError(t.errOtp6);
             return;
         }
 
@@ -70,7 +73,7 @@ export default function RegisterPage() {
             }
             router.push("/dashboard");
         } catch {
-            setError("Mã OTP không đúng. Vui lòng thử lại.");
+            setError(t.errOtpWrong);
         } finally {
             setLoading(false);
         }
@@ -78,13 +81,13 @@ export default function RegisterPage() {
 
     const stepConfig = {
         credentials: {
-            title: "Tạo tài khoản",
-            subtitle: "Nhập email và mật khẩu để bắt đầu",
+            title: t.registerTitle,
+            subtitle: t.registerSubtitle,
             handler: handleSignUp,
         },
         otp: {
-            title: "Xác thực email",
-            subtitle: `Chúng tôi đã gửi mã OTP đến ${email}`,
+            title: t.otpTitle,
+            subtitle: `${t.otpSubtitlePrefix} ${email}`,
             handler: handleVerifyOTP,
         },
     };
@@ -185,7 +188,7 @@ export default function RegisterPage() {
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         className="input-glass !pl-12 !pr-12"
-                                        placeholder="Mật khẩu (tối thiểu 6 ký tự)"
+                                        placeholder={t.passwordHint}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                     />
@@ -206,7 +209,7 @@ export default function RegisterPage() {
                                     <input
                                         type={showConfirm ? "text" : "password"}
                                         className="input-glass !pl-12 !pr-12"
-                                        placeholder="Xác nhận mật khẩu"
+                                        placeholder={t.confirmPassword}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                     />
@@ -231,7 +234,7 @@ export default function RegisterPage() {
                                 <input
                                     type="text"
                                     className="input-glass !pl-12 text-center tracking-[0.5em] text-xl font-mono"
-                                    placeholder="000000"
+                                    placeholder={t.otpPlaceholder}
                                     maxLength={6}
                                     value={otp}
                                     onChange={(e) =>
@@ -251,8 +254,8 @@ export default function RegisterPage() {
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    {step === "credentials" && "Đăng ký & Gửi mã OTP"}
-                                    {step === "otp" && "Xác thực"}
+                                    {step === "credentials" && t.registerButton}
+                                    {step === "otp" && t.otpButton}
                                     <ArrowRight className="w-4 h-4" />
                                 </>
                             )}
@@ -265,21 +268,24 @@ export default function RegisterPage() {
                             className="w-full text-center text-sm mt-4 transition-colors"
                             style={{ color: "#64748B" }}
                         >
-                            ← Quay lại
+                            {t.otpBack}
                         </button>
                     )}
                 </div>
 
-                <p className="text-center text-sm mt-6 auth-slide-up" style={{ color: "#64748B", animationDelay: "200ms" }}>
-                    Đã có tài khoản?{" "}
-                    <Link
-                        href="/login"
-                        className="font-semibold"
-                        style={{ color: "#DB2777" }}
-                    >
-                        Đăng nhập
-                    </Link>
-                </p>
+                <div className="flex items-center justify-center gap-4 mt-6 auth-slide-up" style={{ animationDelay: "200ms" }}>
+                    <p className="text-sm" style={{ color: "#64748B" }}>
+                        {t.hasAccount}{" "}
+                        <Link
+                            href="/login"
+                            className="font-semibold"
+                            style={{ color: "#DB2777" }}
+                        >
+                            {t.loginLink}
+                        </Link>
+                    </p>
+                    <LandingLanguageSwitcher currentLocale={locale} dropUp />
+                </div>
             </div>
         </div>
     );

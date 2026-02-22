@@ -49,6 +49,7 @@ export default async function DashboardPage() {
             bg: "rgba(100, 116, 139, 0.08)",
             delta: stats.itemsThisWeek > 0 ? `+${stats.itemsThisWeek} ${t(locale, "dashboard.thisWeek")}` : null,
             deltaColor: "#16A34A",
+            href: "/items",
         },
         {
             label: t(locale, "dashboard.collections"),
@@ -58,6 +59,7 @@ export default async function DashboardPage() {
             bg: "color-mix(in srgb, var(--primary) 10%, transparent)",
             delta: null,
             deltaColor: "",
+            href: "/lists",
         },
         {
             label: t(locale, "sidebar.tags"),
@@ -67,6 +69,7 @@ export default async function DashboardPage() {
             bg: "rgba(37, 99, 235, 0.08)",
             delta: null,
             deltaColor: "",
+            href: "/tags",
         },
         {
             label: t(locale, "common.public"),
@@ -76,6 +79,7 @@ export default async function DashboardPage() {
             bg: "rgba(22, 163, 74, 0.08)",
             delta: null,
             deltaColor: "",
+            href: "",
         },
     ];
 
@@ -119,36 +123,50 @@ export default async function DashboardPage() {
 
             {/* ═══════════ 2. KPI STAT CARDS ═══════════ */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 md:mb-8">
-                {statCards.map((card) => (
-                    <div key={card.label} className="stat-card">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div
-                                className="w-10 h-10 flex items-center justify-center"
-                                style={{
-                                    background: card.bg,
-                                    borderRadius: "var(--radius-md)",
-                                }}
-                            >
-                                <card.icon
-                                    className="w-5 h-5"
-                                    style={{ color: card.color }}
-                                />
+                {statCards.map((card) => {
+                    const inner = (
+                        <>
+                            <div className="flex items-center justify-between mb-3">
+                                <div
+                                    className="w-10 h-10 flex items-center justify-center"
+                                    style={{
+                                        background: card.bg,
+                                        borderRadius: "var(--radius-md)",
+                                    }}
+                                >
+                                    <card.icon
+                                        className="w-5 h-5"
+                                        style={{ color: card.color }}
+                                    />
+                                </div>
+                                {card.href && (
+                                    <ArrowRight className="w-4 h-4" style={{ color: "#CBD5E1" }} />
+                                )}
                             </div>
-                        </div>
-                        <p className="text-2xl font-bold" style={{ color: "#1E293B" }}>
-                            {card.value}
-                        </p>
-                        <p className="text-sm mt-0.5" style={{ color: "var(--muted)" }}>
-                            {card.label}
-                        </p>
-                        {card.delta && (
-                            <p className="text-xs mt-1.5 flex items-center gap-1" style={{ color: card.deltaColor }}>
-                                <TrendingUp className="w-3 h-3" />
-                                {card.delta}
+                            <p className="text-2xl font-bold" style={{ color: "#1E293B" }}>
+                                {card.value}
                             </p>
-                        )}
-                    </div>
-                ))}
+                            <p className="text-sm mt-0.5" style={{ color: "var(--muted)" }}>
+                                {card.label}
+                            </p>
+                            {card.delta && (
+                                <p className="text-xs mt-1.5 flex items-center gap-1" style={{ color: card.deltaColor }}>
+                                    <TrendingUp className="w-3 h-3" />
+                                    {card.delta}
+                                </p>
+                            )}
+                        </>
+                    );
+                    return card.href ? (
+                        <Link key={card.label} href={card.href} className="stat-card hover:shadow-md transition-shadow cursor-pointer" style={{ textDecoration: "none" }}>
+                            {inner}
+                        </Link>
+                    ) : (
+                        <div key={card.label} className="stat-card">
+                            {inner}
+                        </div>
+                    );
+                })}
             </div>
 
             {/* ═══════════ 3. ACTIVITY CHART + TAG DISTRIBUTION ═══════════ */}
@@ -503,6 +521,6 @@ export default async function DashboardPage() {
                     {t(locale, "dashboard.tryNow")}
                 </Link>
             </div>
-        </div>
+        </div >
     );
 }

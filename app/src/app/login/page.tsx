@@ -5,9 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { signIn } from "@/lib/auth-actions";
+import { useAuthLocale } from "@/hooks/use-auth-locale";
+import { LandingLanguageSwitcher } from "@/components/landing-language-switcher";
 
 export default function LoginPage() {
     const router = useRouter();
+    const { locale, t } = useAuthLocale();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -19,7 +22,7 @@ export default function LoginPage() {
         setError("");
 
         if (!email || !password) {
-            setError("Vui lòng nhập đầy đủ thông tin");
+            setError(t.errFillAll);
             return;
         }
 
@@ -32,7 +35,7 @@ export default function LoginPage() {
             }
             router.push("/dashboard");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Có lỗi xảy ra khi kết nối. Vui lòng thử lại.");
+            setError(err instanceof Error ? err.message : t.errConnection);
         } finally {
             setLoading(false);
         }
@@ -74,10 +77,10 @@ export default function LoginPage() {
                     }}
                 >
                     <h1 className="text-2xl font-bold text-center mb-1" style={{ color: "#1E293B" }}>
-                        Chào mừng trở lại
+                        {t.loginTitle}
                     </h1>
                     <p className="text-center mb-8 text-sm" style={{ color: "#94A3B8" }}>
-                        Đăng nhập để quản lý danh sách yêu thích
+                        {t.loginSubtitle}
                     </p>
 
                     {error && (
@@ -92,7 +95,7 @@ export default function LoginPage() {
                             <input
                                 type="email"
                                 className="input-glass !pl-12"
-                                placeholder="Email"
+                                placeholder={t.emailPlaceholder}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 autoFocus
@@ -104,7 +107,7 @@ export default function LoginPage() {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 className="input-glass !pl-12 !pr-12"
-                                placeholder="Mật khẩu"
+                                placeholder={t.passwordPlaceholder}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
@@ -127,7 +130,7 @@ export default function LoginPage() {
                                 className="text-sm font-medium"
                                 style={{ color: "#DB2777" }}
                             >
-                                Quên mật khẩu?
+                                {t.forgotPassword}
                             </Link>
                         </div>
 
@@ -140,7 +143,7 @@ export default function LoginPage() {
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    Đăng nhập
+                                    {t.loginButton}
                                     <ArrowRight className="w-4 h-4" />
                                 </>
                             )}
@@ -148,16 +151,19 @@ export default function LoginPage() {
                     </form>
                 </div>
 
-                <p className="text-center text-sm mt-6 auth-slide-up" style={{ color: "#64748B", animationDelay: "200ms" }}>
-                    Chưa có tài khoản?{" "}
-                    <Link
-                        href="/register"
-                        className="font-semibold"
-                        style={{ color: "#DB2777" }}
-                    >
-                        Đăng ký ngay
-                    </Link>
-                </p>
+                <div className="flex items-center justify-center gap-4 mt-6 auth-slide-up" style={{ animationDelay: "200ms" }}>
+                    <p className="text-sm" style={{ color: "#64748B" }}>
+                        {t.noAccount}{" "}
+                        <Link
+                            href="/register"
+                            className="font-semibold"
+                            style={{ color: "#DB2777" }}
+                        >
+                            {t.registerLink}
+                        </Link>
+                    </p>
+                    <LandingLanguageSwitcher currentLocale={locale} dropUp />
+                </div>
             </div>
         </div>
     );

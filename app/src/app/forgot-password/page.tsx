@@ -19,12 +19,15 @@ import {
     verifyRecoveryOtp,
     updatePassword,
 } from "@/lib/auth-actions";
+import { useAuthLocale } from "@/hooks/use-auth-locale";
+import { LandingLanguageSwitcher } from "@/components/landing-language-switcher";
 
 type Step = "email" | "otp" | "password";
 const STEPS: Step[] = ["email", "otp", "password"];
 
 export default function ForgotPasswordPage() {
     const router = useRouter();
+    const { locale, t } = useAuthLocale();
     const [step, setStep] = useState<Step>("email");
     const [email, setEmail] = useState("");
     const [otp, setOtp] = useState("");
@@ -42,7 +45,7 @@ export default function ForgotPasswordPage() {
         setError("");
 
         if (!email) {
-            setError("Vui lòng nhập email");
+            setError(t.errEnterEmail);
             return;
         }
 
@@ -55,7 +58,7 @@ export default function ForgotPasswordPage() {
             }
             setStep("otp");
         } catch {
-            setError("Có lỗi xảy ra. Vui lòng thử lại.");
+            setError(t.errGeneral);
         } finally {
             setLoading(false);
         }
@@ -67,7 +70,7 @@ export default function ForgotPasswordPage() {
         setError("");
 
         if (otp.length !== 6) {
-            setError("Mã OTP phải có 6 chữ số");
+            setError(t.errOtp6);
             return;
         }
 
@@ -80,7 +83,7 @@ export default function ForgotPasswordPage() {
             }
             setStep("password");
         } catch {
-            setError("Mã OTP không đúng. Vui lòng thử lại.");
+            setError(t.errOtpWrong);
         } finally {
             setLoading(false);
         }
@@ -92,11 +95,11 @@ export default function ForgotPasswordPage() {
         setError("");
 
         if (password.length < 6) {
-            setError("Mật khẩu phải có ít nhất 6 ký tự");
+            setError(t.errPasswordMin);
             return;
         }
         if (password !== confirmPassword) {
-            setError("Mật khẩu không khớp");
+            setError(t.errPasswordMatch);
             return;
         }
 
@@ -110,7 +113,7 @@ export default function ForgotPasswordPage() {
             setSuccess(true);
             setTimeout(() => router.push("/login"), 2000);
         } catch {
-            setError("Có lỗi xảy ra. Vui lòng thử lại.");
+            setError(t.errGeneral);
         } finally {
             setLoading(false);
         }
@@ -118,18 +121,18 @@ export default function ForgotPasswordPage() {
 
     const stepConfig = {
         email: {
-            title: "Quên mật khẩu",
-            subtitle: "Nhập email đã đăng ký để nhận mã OTP",
+            title: t.fpTitle,
+            subtitle: t.fpSubtitle,
             handler: handleRequestOtp,
         },
         otp: {
-            title: "Xác thực email",
-            subtitle: `Nhập mã OTP đã gửi đến ${email}`,
+            title: t.otpTitle,
+            subtitle: `${t.fpOtpSubtitlePrefix} ${email}`,
             handler: handleVerifyOtp,
         },
         password: {
-            title: "Mật khẩu mới",
-            subtitle: "Thiết lập mật khẩu mới cho tài khoản",
+            title: t.fpNewPassTitle,
+            subtitle: t.fpNewPassSubtitle,
             handler: handleUpdatePassword,
         },
     };
@@ -167,10 +170,10 @@ export default function ForgotPasswordPage() {
                             <CheckCircle2 className="w-8 h-8 text-white" />
                         </div>
                         <h2 className="text-xl font-bold mb-2" style={{ color: "#1E293B" }}>
-                            Đổi mật khẩu thành công!
+                            {t.fpSuccessTitle}
                         </h2>
                         <p className="text-sm" style={{ color: "#94A3B8" }}>
-                            Đang chuyển hướng đến trang đăng nhập...
+                            {t.fpSuccessSubtitle}
                         </p>
                     </div>
                 </div>
@@ -217,10 +220,10 @@ export default function ForgotPasswordPage() {
                             <div key={s} className="flex items-center gap-2">
                                 <div
                                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${step === s
-                                            ? "bg-gradient-to-br from-pink-400 to-rose-500 text-white shadow-lg"
-                                            : currentStepIndex > i
-                                                ? "bg-pink-200 text-pink-700"
-                                                : "bg-gray-200 text-gray-400"
+                                        ? "bg-gradient-to-br from-pink-400 to-rose-500 text-white shadow-lg"
+                                        : currentStepIndex > i
+                                            ? "bg-pink-200 text-pink-700"
+                                            : "bg-gray-200 text-gray-400"
                                         }`}
                                 >
                                     {currentStepIndex > i ? (
@@ -260,7 +263,7 @@ export default function ForgotPasswordPage() {
                                 <input
                                     type="email"
                                     className="input-glass !pl-12"
-                                    placeholder="Email đã đăng ký"
+                                    placeholder={t.fpEmailPlaceholder}
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     autoFocus
@@ -275,7 +278,7 @@ export default function ForgotPasswordPage() {
                                 <input
                                     type="text"
                                     className="input-glass !pl-12 text-center tracking-[0.5em] text-xl font-mono"
-                                    placeholder="000000"
+                                    placeholder={t.otpPlaceholder}
                                     maxLength={6}
                                     value={otp}
                                     onChange={(e) =>
@@ -294,7 +297,7 @@ export default function ForgotPasswordPage() {
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         className="input-glass !pl-12 !pr-12"
-                                        placeholder="Mật khẩu mới (tối thiểu 6 ký tự)"
+                                        placeholder={t.fpNewPassPlaceholder}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         autoFocus
@@ -316,7 +319,7 @@ export default function ForgotPasswordPage() {
                                     <input
                                         type={showConfirm ? "text" : "password"}
                                         className="input-glass !pl-12 !pr-12"
-                                        placeholder="Xác nhận mật khẩu mới"
+                                        placeholder={t.fpConfirmPlaceholder}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                     />
@@ -344,9 +347,9 @@ export default function ForgotPasswordPage() {
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    {step === "email" && "Gửi mã OTP"}
-                                    {step === "otp" && "Xác thực"}
-                                    {step === "password" && "Đổi mật khẩu"}
+                                    {step === "email" && t.fpSendOtp}
+                                    {step === "otp" && t.otpButton}
+                                    {step === "password" && t.fpChangeButton}
                                     <ArrowRight className="w-4 h-4" />
                                 </>
                             )}
@@ -364,20 +367,20 @@ export default function ForgotPasswordPage() {
                             style={{ color: "#64748B" }}
                         >
                             <ArrowLeft className="w-3.5 h-3.5" />
-                            Quay lại
+                            {t.fpBack}
                         </button>
                     )}
                 </div>
 
-                <p
-                    className="text-center text-sm mt-6 auth-slide-up"
-                    style={{ color: "#64748B", animationDelay: "200ms" }}
-                >
-                    Nhớ mật khẩu rồi?{" "}
-                    <Link href="/login" className="font-semibold" style={{ color: "#DB2777" }}>
-                        Đăng nhập
-                    </Link>
-                </p>
+                <div className="flex items-center justify-center gap-4 mt-6 auth-slide-up" style={{ animationDelay: "200ms" }}>
+                    <p className="text-sm" style={{ color: "#64748B" }}>
+                        {t.fpRemember}{" "}
+                        <Link href="/login" className="font-semibold" style={{ color: "#DB2777" }}>
+                            {t.loginLink}
+                        </Link>
+                    </p>
+                    <LandingLanguageSwitcher currentLocale={locale} dropUp />
+                </div>
             </div>
         </div>
     );
