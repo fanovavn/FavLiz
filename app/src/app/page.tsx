@@ -188,7 +188,7 @@ export default async function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-4xl mx-auto">
+          <div className="text-center max-w-5xl mx-auto">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-50 border border-pink-200 rounded-full mb-8 landing-reveal">
               <Sparkles className="w-4 h-4 text-pink-500" />
@@ -203,7 +203,7 @@ export default async function LandingPage() {
               style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", fontWeight: 800, lineHeight: 1.1, animationDelay: "100ms" }}
             >
               {t.heroLine1}
-              <br />
+
               {t.heroLine2}
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600">

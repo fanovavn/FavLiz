@@ -4,6 +4,25 @@ Tất cả thay đổi đáng chú ý của **Web User** sẽ được ghi nhậ
 
 ---
 
+## [v1.4.1] — 2026-02-22
+
+### 🔧 Đồng bộ ngôn ngữ & Cải thiện UI
+
+#### 🐛 Sửa lỗi
+- **Fix đồng bộ ngôn ngữ Landing ↔ App** — đổi ngôn ngữ ở landing page, vào app dashboard vẫn giữ đúng ngôn ngữ đã chọn
+- **Fix đồng bộ ngược App → Landing** — đổi ngôn ngữ trong sidebar cũng cập nhật cookie `landing_locale`, tránh bị ghi đè khi refresh
+
+#### 🎨 Cải thiện giao diện
+- **Language switcher auth pages** — dời xuống cuối trang, nằm cùng hàng với link đăng ký/đăng nhập
+- **Dropdown mở lên trên (dropUp)** — tránh bị che khuất trên màn hình nhỏ
+- **Mở rộng hero section** — `max-w-4xl` → `max-w-5xl` trên desktop cho thoáng hơn
+
+#### 📝 Cập nhật nội dung
+- Đổi badge landing page: "Công cụ quản lý yêu thích #1 Việt Nam" → "Công cụ quản lý yêu thích ưa chuộng toàn cầu" (cả 4 ngôn ngữ)
+- Gộp heroLine1 + heroLine2 thành 1 dòng cho tự nhiên hơn (cả 4 ngôn ngữ)
+
+---
+
 ## [v1.4.0] — 2026-02-22
 
 ### 🌍 Đa ngôn ngữ Landing Page, Auth & Onboarding

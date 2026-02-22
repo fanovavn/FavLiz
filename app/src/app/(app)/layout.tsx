@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ItemsLabelProvider } from "@/components/items-label-provider";
@@ -7,7 +8,7 @@ import { LanguageProvider } from "@/components/language-provider";
 import { TagPopupProvider } from "@/components/tag-detail-popup";
 import { OnboardingPopup } from "@/components/onboarding-popup";
 import { prisma } from "@/lib/prisma";
-import { type Locale, DEFAULT_LOCALE } from "@/lib/i18n";
+import { SUPPORTED_LOCALES, type Locale, DEFAULT_LOCALE } from "@/lib/i18n";
 
 export default async function AppLayout({
     children,
@@ -29,9 +30,26 @@ export default async function AppLayout({
         select: { themeColor: true, itemsLabel: true, language: true, onboardingComplete: true, name: true },
     });
 
+    // Sync landing_locale cookie → DB language (so landing language choice carries into the app)
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get("landing_locale")?.value as Locale | undefined;
+    let locale = (dbUser?.language as Locale) || DEFAULT_LOCALE;
+
+    if (
+        cookieLocale &&
+        (SUPPORTED_LOCALES as readonly string[]).includes(cookieLocale) &&
+        cookieLocale !== locale
+    ) {
+        // Update DB to match the cookie
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { language: cookieLocale },
+        });
+        locale = cookieLocale;
+    }
+
     const showOnboarding = !dbUser?.onboardingComplete || !dbUser?.name;
     const itemsLabel = dbUser?.itemsLabel || "Items";
-    const locale = (dbUser?.language as Locale) || DEFAULT_LOCALE;
 
     return (
         <ThemeProvider themeColor={dbUser?.themeColor || null}>

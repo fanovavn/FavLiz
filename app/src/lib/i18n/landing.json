@@ -1,8 +1,8 @@
 {
     "vi": {
-        "badge": "Công cụ quản lý yêu thích #1 Việt Nam",
-        "heroLine1": "Lưu mọi thứ bạn",
-        "heroLine2": "yêu thích.",
+        "badge": "Công cụ quản lý yêu thích ưa chuộng toàn cầu",
+        "heroLine1": "Lưu mọi thứ bạn yêu thích.",
+        "heroLine2": "",
         "heroLine3": "Ở một nơi duy nhất.",
         "subtitle": "FavLiz giúp bạn lưu, tổ chức và chia sẻ bất kỳ nội dung nào trên internet, từ công thức nấu ăn, video YouTube, sản phẩm Shopee đến repo GitHub.",
         "subtext": "Không còn bookmark lộn xộn. Không còn screenshot rồi quên.",
@@ -151,9 +151,9 @@
         "comingSoonOk": "Đã hiểu"
     },
     "en": {
-        "badge": "#1 Favorites Manager in Vietnam",
-        "heroLine1": "Save everything you",
-        "heroLine2": "love.",
+        "badge": "The globally loved favorites manager",
+        "heroLine1": "Save everything you love.",
+        "heroLine2": "",
         "heroLine3": "In one place.",
         "subtitle": "FavLiz helps you save, organize, and share any content on the internet — from recipes, YouTube videos, Shopee products to GitHub repos.",
         "subtext": "No more messy bookmarks. No more forgotten screenshots.",
@@ -302,9 +302,9 @@
         "comingSoonOk": "Got it"
     },
     "zh": {
-        "badge": "越南 #1 收藏管理工具",
-        "heroLine1": "保存你所有",
-        "heroLine2": "喜爱的。",
+        "badge": "全球受欢迎的收藏管理工具",
+        "heroLine1": "保存你所有喜爱的。",
+        "heroLine2": "",
         "heroLine3": "集中一处。",
         "subtitle": "FavLiz 帮助你保存、整理和分享互联网上的任何内容——从食谱、YouTube视频、Shopee产品到GitHub仓库。",
         "subtext": "不再杂乱的书签。不再遗忘的截图。",
@@ -453,9 +453,9 @@
         "comingSoonOk": "知道了"
     },
     "ru": {
-        "badge": "Инструмент #1 для управления избранным во Вьетнаме",
-        "heroLine1": "Сохраняйте всё, что вы",
-        "heroLine2": "любите.",
+        "badge": "Любимый инструмент управления избранным по всему миру",
+        "heroLine1": "Сохраняйте всё, что вы любите.",
+        "heroLine2": "",
         "heroLine3": "В одном месте.",
         "subtitle": "FavLiz помогает сохранять, организовывать и делиться любым контентом из интернета — от рецептов, видео YouTube, товаров Shopee до репозиториев GitHub.",
         "subtext": "Больше никаких хаотичных закладок. Больше никаких забытых скриншотов.",
