@@ -77,8 +77,11 @@ export async function requestPasswordReset(email: string) {
         return { error: 'Email chưa được đăng ký trong hệ thống' };
     }
 
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const supabase = await createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${siteUrl}/auth/callback?next=/reset-password`,
+    });
 
     if (error) {
         return { error: error.message };
@@ -87,21 +90,7 @@ export async function requestPasswordReset(email: string) {
     return { error: null };
 }
 
-export async function verifyRecoveryOtp(email: string, token: string) {
-    const supabase = await createClient();
 
-    const { data, error } = await supabase.auth.verifyOtp({
-        email,
-        token,
-        type: 'recovery',
-    });
-
-    if (error) {
-        return { error: error.message };
-    }
-
-    return { data, error: null };
-}
 
 export async function updatePassword(newPassword: string) {
     const supabase = await createClient();

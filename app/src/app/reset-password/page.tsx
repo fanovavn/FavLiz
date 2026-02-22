@@ -2,40 +2,52 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
     Heart,
-    Mail,
+    Lock,
+    Eye,
+    EyeOff,
     ArrowRight,
     CheckCircle2,
 } from "lucide-react";
-import { requestPasswordReset } from "@/lib/auth-actions";
+import { updatePassword } from "@/lib/auth-actions";
 import { useAuthLocale } from "@/hooks/use-auth-locale";
 import { LandingLanguageSwitcher } from "@/components/landing-language-switcher";
 
-export default function ForgotPasswordPage() {
+export default function ResetPasswordPage() {
+    const router = useRouter();
     const { locale, t } = useAuthLocale();
-    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [sent, setSent] = useState(false);
+    const [success, setSuccess] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleUpdatePassword = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
 
-        if (!email) {
-            setError(t.errEnterEmail);
+        if (password.length < 6) {
+            setError(t.errPasswordMin);
+            return;
+        }
+        if (password !== confirmPassword) {
+            setError(t.errPasswordMatch);
             return;
         }
 
         setLoading(true);
         try {
-            const result = await requestPasswordReset(email);
+            const result = await updatePassword(password);
             if (result.error) {
                 setError(result.error);
                 return;
             }
-            setSent(true);
+            setSuccess(true);
+            setTimeout(() => router.push("/login"), 2000);
         } catch {
             setError(t.errGeneral);
         } finally {
@@ -43,8 +55,8 @@ export default function ForgotPasswordPage() {
         }
     };
 
-    /* ── Email sent confirmation ──────────────── */
-    if (sent) {
+    /* ── Success screen ────────────────────────── */
+    if (success) {
         return (
             <div
                 className="min-h-screen relative overflow-hidden flex items-center justify-center px-4 py-8"
@@ -70,27 +82,14 @@ export default function ForgotPasswordPage() {
                             className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
                             style={{ background: "linear-gradient(135deg, #DB2777, #EC4899)" }}
                         >
-                            <Mail className="w-8 h-8 text-white" />
+                            <CheckCircle2 className="w-8 h-8 text-white" />
                         </div>
                         <h2 className="text-xl font-bold mb-2" style={{ color: "#1E293B" }}>
-                            {t.fpSentTitle}
+                            {t.fpSuccessTitle}
                         </h2>
-                        <p className="text-sm mb-4" style={{ color: "#94A3B8" }}>
-                            {t.fpSentSubtitle}
+                        <p className="text-sm" style={{ color: "#94A3B8" }}>
+                            {t.fpSuccessSubtitle}
                         </p>
-                        <p className="text-sm font-semibold" style={{ color: "#DB2777" }}>
-                            {email}
-                        </p>
-                    </div>
-
-                    <div className="flex items-center justify-center gap-4 mt-6 auth-slide-up" style={{ animationDelay: "200ms" }}>
-                        <p className="text-sm" style={{ color: "#64748B" }}>
-                            {t.fpRemember}{" "}
-                            <Link href="/login" className="font-semibold" style={{ color: "#DB2777" }}>
-                                {t.loginLink}
-                            </Link>
-                        </p>
-                        <LandingLanguageSwitcher currentLocale={locale} dropUp />
                     </div>
                 </div>
             </div>
@@ -131,10 +130,10 @@ export default function ForgotPasswordPage() {
                     }}
                 >
                     <h1 className="text-2xl font-bold text-center mb-1" style={{ color: "#1E293B" }}>
-                        {t.fpTitle}
+                        {t.rpTitle || t.fpNewPassTitle}
                     </h1>
                     <p className="text-center mb-6 text-sm" style={{ color: "#94A3B8" }}>
-                        {t.fpSubtitle}
+                        {t.rpSubtitle || t.fpNewPassSubtitle}
                     </p>
 
                     {error && (
@@ -143,17 +142,49 @@ export default function ForgotPasswordPage() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleUpdatePassword} className="space-y-4">
                         <div className="relative">
-                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                             <input
-                                type="email"
-                                className="input-glass !pl-12"
-                                placeholder={t.fpEmailPlaceholder}
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                type={showPassword ? "text" : "password"}
+                                className="input-glass !pl-12 !pr-12"
+                                placeholder={t.fpNewPassPlaceholder}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 autoFocus
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="w-5 h-5" />
+                                ) : (
+                                    <Eye className="w-5 h-5" />
+                                )}
+                            </button>
+                        </div>
+                        <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type={showConfirm ? "text" : "password"}
+                                className="input-glass !pl-12 !pr-12"
+                                placeholder={t.fpConfirmPlaceholder}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirm(!showConfirm)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                {showConfirm ? (
+                                    <EyeOff className="w-5 h-5" />
+                                ) : (
+                                    <Eye className="w-5 h-5" />
+                                )}
+                            </button>
                         </div>
 
                         <button
@@ -165,7 +196,7 @@ export default function ForgotPasswordPage() {
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    {t.fpSendLink}
+                                    {t.fpChangeButton}
                                     <ArrowRight className="w-4 h-4" />
                                 </>
                             )}
