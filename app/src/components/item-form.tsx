@@ -40,6 +40,8 @@ interface ItemFormProps {
     };
     availableLists: { id: string; name: string }[];
     availableTags: { id: string; name: string }[];
+    preSelectedListId?: string;
+    returnTo?: string;
 }
 
 export function ItemForm({
@@ -47,6 +49,8 @@ export function ItemForm({
     initialData,
     availableLists,
     availableTags,
+    preSelectedListId,
+    returnTo,
 }: ItemFormProps) {
     const router = useRouter();
     const { singleItemLabel } = useItemsLabel();
@@ -71,7 +75,7 @@ export function ItemForm({
         initialData?.tags.map((t) => t.name) || []
     );
     const [selectedListIds, setSelectedListIds] = useState<string[]>(
-        initialData?.lists.map((l) => l.id) || []
+        initialData?.lists.map((l) => l.id) || (preSelectedListId ? [preSelectedListId] : [])
     );
     const [localLists, setLocalLists] = useState(availableLists);
     const [showCreateList, setShowCreateList] = useState(false);
@@ -260,7 +264,7 @@ export function ItemForm({
                 window.location.href = `/items/${initialData.id}`;
             } else {
                 const result = await createItem(payload);
-                window.location.href = `/items/${result.id}`;
+                window.location.href = returnTo || `/items/${result.id}`;
             }
         } catch {
             setError("Có lỗi xảy ra. Vui lòng thử lại.");

@@ -342,3 +342,24 @@ export async function updateListItems(listId: string, itemIds: string[]) {
     return { success: true };
 }
 
+// ─── REMOVE SINGLE ITEM FROM LIST ───────────────────────────
+
+export async function removeItemFromList(listId: string, itemId: string) {
+    const userId = await getAuthUserId();
+
+    const list = await prisma.list.findFirst({
+        where: { id: listId, userId },
+        select: { id: true },
+    });
+    if (!list) return { error: "Bộ sưu tập không tồn tại." };
+
+    await prisma.list.update({
+        where: { id: listId },
+        data: {
+            items: { disconnect: { id: itemId } },
+        },
+    });
+
+    revalidatePath(`/lists/${listId}`);
+    return { success: true };
+}

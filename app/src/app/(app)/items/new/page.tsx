@@ -1,8 +1,24 @@
 import { ItemForm } from "@/components/item-form";
 import { getUserLists, getUserTags } from "@/lib/item-actions";
 
-export default async function NewItemPage() {
-    const [lists, tags] = await Promise.all([getUserLists(), getUserTags()]);
+interface PageProps {
+    searchParams: Promise<{ listId?: string; returnTo?: string }>;
+}
 
-    return <ItemForm mode="create" availableLists={lists} availableTags={tags} />;
+export default async function NewItemPage({ searchParams }: PageProps) {
+    const [lists, tags, params] = await Promise.all([
+        getUserLists(),
+        getUserTags(),
+        searchParams,
+    ]);
+
+    return (
+        <ItemForm
+            mode="create"
+            availableLists={lists}
+            availableTags={tags}
+            preSelectedListId={params.listId}
+            returnTo={params.returnTo}
+        />
+    );
 }

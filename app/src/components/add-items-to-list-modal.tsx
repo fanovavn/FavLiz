@@ -9,8 +9,10 @@ import {
     Loader2,
     Plus,
     Inbox,
+    Sparkles,
 } from "lucide-react";
 import { getItemsForListPicker, updateListItems } from "@/lib/list-actions";
+import Link from "next/link";
 
 // ─── TYPES ──────────────────────────────────────────────────
 
@@ -59,12 +61,17 @@ export function AddItemsToListModal({
         });
     }, [open, listId]);
 
-    // Filter by search
+    // Items NOT yet in the list
+    const availableItems = useMemo(() => {
+        return items.filter((item) => !item.isInList);
+    }, [items]);
+
+    // Filter by search (only show items NOT in list)
     const filteredItems = useMemo(() => {
-        if (!searchQuery.trim()) return items;
+        if (!searchQuery.trim()) return availableItems;
         const q = searchQuery.toLowerCase().trim();
-        return items.filter((item) => item.title.toLowerCase().includes(q));
-    }, [items, searchQuery]);
+        return availableItems.filter((item) => item.title.toLowerCase().includes(q));
+    }, [availableItems, searchQuery]);
 
     // Toggle selection
     const toggleItem = useCallback((id: string) => {
@@ -76,18 +83,21 @@ export function AddItemsToListModal({
         });
     }, []);
 
-    // Count changes
+    // Count of original items in list
     const originalIds = useMemo(() => {
         return new Set(items.filter((i) => i.isInList).map((i) => i.id));
     }, [items]);
 
-    const hasChanges = useMemo(() => {
-        if (selectedIds.size !== originalIds.size) return true;
+    // How many new items selected
+    const newlySelectedCount = useMemo(() => {
+        let count = 0;
         for (const id of selectedIds) {
-            if (!originalIds.has(id)) return true;
+            if (!originalIds.has(id)) count++;
         }
-        return false;
+        return count;
     }, [selectedIds, originalIds]);
+
+    const hasChanges = newlySelectedCount > 0;
 
     // Save
     const handleSave = async () => {
@@ -112,8 +122,13 @@ export function AddItemsToListModal({
     return (
         <div className="dialog-overlay" onClick={onClose}>
             <div
-                className="glass-card w-full max-w-lg mx-4 flex flex-col"
-                style={{ maxHeight: "80vh" }}
+                className="w-full max-w-lg mx-4 flex flex-col"
+                style={{
+                    maxHeight: "80vh",
+                    background: "#fff",
+                    borderRadius: "var(--radius-xl)",
+                    boxShadow: "0 25px 60px rgba(0, 0, 0, 0.2)",
+                }}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* ─── Header ───────────────────────────── */}
@@ -156,7 +171,7 @@ export function AddItemsToListModal({
                         className="flex items-center gap-2 px-3 py-2.5"
                         style={{
                             borderRadius: "var(--radius-md)",
-                            background: "rgba(241,245,249,0.8)",
+                            background: "#f8fafc",
                             border: "1px solid rgba(226,232,240,0.6)",
                         }}
                     >
@@ -182,10 +197,37 @@ export function AddItemsToListModal({
                     </div>
                 </div>
 
+                {/* ─── Create New Button ──────────────── */}
+                <div className="px-6 pb-3">
+                    <Link
+                        href={`/items/new?listId=${listId}&returnTo=/lists/${listId}`}
+                        className="w-full flex items-center gap-3 px-4 py-3 transition-all"
+                        style={{
+                            borderRadius: "var(--radius-md)",
+                            border: "1.5px dashed color-mix(in srgb, var(--primary) 35%, transparent)",
+                            background: "color-mix(in srgb, var(--primary) 4%, transparent)",
+                            textDecoration: "none",
+                            color: "var(--primary)",
+                        }}
+                    >
+                        <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                            style={{
+                                background: "color-mix(in srgb, var(--primary) 12%, transparent)",
+                            }}
+                        >
+                            <Sparkles className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-semibold">
+                            Tạo {singleItemLabel} mới
+                        </span>
+                    </Link>
+                </div>
+
                 {/* ─── Items List ────────────────────────── */}
                 <div
                     className="flex-1 overflow-y-auto px-6"
-                    style={{ minHeight: "200px" }}
+                    style={{ minHeight: "150px" }}
                 >
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
@@ -195,13 +237,20 @@ export function AddItemsToListModal({
                         <div className="text-center py-12">
                             <div
                                 className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3"
-                                style={{ background: "rgba(241,245,249,0.8)" }}
+                                style={{ background: "#f8fafc" }}
                             >
                                 <Inbox className="w-6 h-6" style={{ color: "var(--muted)" }} />
                             </div>
                             <p className="text-sm font-medium" style={{ color: "#64748B" }}>
-                                {searchQuery ? `Không tìm thấy "${searchQuery}"` : `Chưa có ${singleItemLabel} nào`}
+                                {searchQuery
+                                    ? `Không tìm thấy "${searchQuery}"`
+                                    : `Tất cả ${singleItemLabel} đã có trong bộ sưu tập`}
                             </p>
+                            {!searchQuery && (
+                                <p className="text-xs mt-1" style={{ color: "var(--muted-light)" }}>
+                                    Bấm &quot;Tạo {singleItemLabel} mới&quot; để thêm
+                                </p>
+                            )}
                         </div>
                     ) : (
                         <div className="space-y-1">
@@ -240,7 +289,7 @@ export function AddItemsToListModal({
                                         {/* Thumbnail */}
                                         <div
                                             className="w-10 h-10 rounded-lg overflow-hidden shrink-0"
-                                            style={{ background: "rgba(241,245,249,0.8)" }}
+                                            style={{ background: "#f1f5f9" }}
                                         >
                                             {item.thumbnail ? (
                                                 <img
@@ -283,7 +332,9 @@ export function AddItemsToListModal({
                     }}
                 >
                     <span className="text-xs" style={{ color: "var(--muted)" }}>
-                        Đã chọn {selectedIds.size} {singleItemLabel}
+                        {newlySelectedCount > 0
+                            ? `Đã chọn thêm ${newlySelectedCount} ${singleItemLabel}`
+                            : `Chọn ${singleItemLabel} để thêm`}
                     </span>
                     <div className="flex items-center gap-2">
                         <button
@@ -321,7 +372,7 @@ export function AddItemsToListModal({
                                     Đang lưu...
                                 </>
                             ) : (
-                                "Áp dụng"
+                                `Thêm ${newlySelectedCount > 0 ? `(${newlySelectedCount})` : ""}`
                             )}
                         </button>
                     </div>

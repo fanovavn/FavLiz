@@ -4,6 +4,35 @@ Tất cả thay đổi đáng chú ý của **Web User** sẽ được ghi nhậ
 
 ---
 
+## [v1.4.2] — 2026-02-23
+
+### 📱 Cải thiện UX bộ sưu tập & Mobile
+
+#### ✨ Tính năng mới
+- **Loại item khỏi bộ sưu tập** — icon 🗑️ trên mỗi item trong trang chi tiết bộ sưu tập:
+  - Grid view: icon đỏ góc trên phải, hiện khi hover
+  - List view: icon đỏ bên phải mỗi row
+  - Popup xác nhận trước khi loại, ghi chú rõ "item vẫn tồn tại, chỉ gỡ khỏi bộ sưu tập"
+- **Popup thêm item cải tiến** — khi bấm "+" trong bộ sưu tập:
+  - Chỉ hiện items **chưa có** trong bộ sưu tập (ẩn items đã thêm)
+  - Nút **"Tạo công thức mới"** — chuyển sang trang tạo item với bộ sưu tập đã chọn sẵn
+  - Sau khi tạo xong tự động quay về bộ sưu tập
+  - Background popup đổi sang trắng
+- **Pre-select bộ sưu tập khi tạo item** — URL `/items/new?listId=...&returnTo=...` tự chọn sẵn bộ sưu tập
+
+#### 🎨 Cải thiện giao diện
+- **Tiêu đề list view** — hiển thị tối đa 2 dòng thay vì cắt 1 dòng (line-clamp-2)
+- **Badge Private/Public** — rút gọn thành icon tròn (🔒/🌐) thay vì chữ + icon
+- **Grid thumbnail** — đổi từ `height: 180px` cố định sang `aspect-ratio: 16/10` responsive
+- **Grid overflow fix** — thêm `min-width: 0` ngăn items tràn ra ngoài grid column
+
+#### 🔧 Backend
+- Thêm `removeItemFromList()` — gỡ 1 item ra khỏi bộ sưu tập (Prisma disconnect)
+- Thêm `preSelectedListId` + `returnTo` props cho ItemForm
+- Cập nhật `items/new/page.tsx` — nhận listId và returnTo từ URL params
+
+---
+
 ## [v1.4.1] — 2026-02-22
 
 ### 🔧 Đồng bộ ngôn ngữ & Cải thiện UI

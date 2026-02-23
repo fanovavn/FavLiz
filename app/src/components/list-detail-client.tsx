@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
     ArrowLeft,
@@ -21,11 +22,14 @@ import {
     X,
     Link2,
     Plus,
+    Trash2,
+    Loader2,
 } from "lucide-react";
 import { ItemCard } from "@/components/item-card";
 import { DeleteListButton } from "@/components/delete-list-dialog";
 import { useTagPopup } from "@/components/tag-detail-popup";
 import { AddItemsToListModal } from "@/components/add-items-to-list-modal";
+import { removeItemFromList } from "@/lib/list-actions";
 
 // ─── TYPES ──────────────────────────────────────────────────
 
@@ -68,6 +72,7 @@ export function ListDetailClient({
     emptyDesc,
     addItemLabel,
 }: ListDetailClientProps) {
+    const router = useRouter();
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [searchQuery, setSearchQuery] = useState("");
     const [descExpanded, setDescExpanded] = useState(false);
@@ -75,7 +80,27 @@ export function ListDetailClient({
     const [copied, setCopied] = useState(false);
     const [fullShareUrl, setFullShareUrl] = useState("");
     const [addItemsOpen, setAddItemsOpen] = useState(false);
+    const [removeTarget, setRemoveTarget] = useState<{ id: string; title: string } | null>(null);
+    const [removing, setRemoving] = useState(false);
     const { openTag } = useTagPopup();
+
+    const handleRemoveItem = async () => {
+        if (!removeTarget) return;
+        setRemoving(true);
+        try {
+            const result = await removeItemFromList(list.id, removeTarget.id);
+            if (result.error) {
+                alert(result.error);
+            } else {
+                router.refresh();
+            }
+        } catch {
+            alert("Có lỗi xảy ra.");
+        } finally {
+            setRemoving(false);
+            setRemoveTarget(null);
+        }
+    };
 
     useEffect(() => {
         if (shareUrl) {
@@ -506,7 +531,29 @@ export function ListDetailClient({
                     /* Grid View */
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {filteredItems.map((item) => (
-                            <ItemCard key={item.id} item={item} />
+                            <div key={item.id} className="relative group/card">
+                                <ItemCard item={item} />
+                                {/* Remove from list button */}
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setRemoveTarget({ id: item.id, title: item.title });
+                                    }}
+                                    className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center cursor-pointer transition-all opacity-0 group-hover/card:opacity-100 z-10"
+                                    style={{
+                                        borderRadius: "var(--radius-sm)",
+                                        background: "rgba(239, 68, 68, 0.85)",
+                                        color: "#fff",
+                                        border: "none",
+                                        backdropFilter: "blur(4px)",
+                                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                                    }}
+                                    title={`Loại khỏi bộ sưu tập`}
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
                         ))}
                     </div>
                 ) : (
@@ -587,23 +634,43 @@ export function ListDetailClient({
                                 </div>
 
                                 {/* Right side */}
-                                <div className="hidden sm:flex flex-col items-end gap-1 shrink-0">
-                                    <span className="text-xs" style={{ color: "var(--muted)" }}>
-                                        {new Date(item.createdAt).toLocaleDateString("vi-VN")}
-                                    </span>
-                                    <span
-                                        className={`badge ${item.viewMode === "PUBLIC" ? "badge-public" : "badge-private"}`}
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <div className="hidden sm:flex flex-col items-end gap-1">
+                                        <span className="text-xs" style={{ color: "var(--muted)" }}>
+                                            {new Date(item.createdAt).toLocaleDateString("vi-VN")}
+                                        </span>
+                                        <span
+                                            className={`badge ${item.viewMode === "PUBLIC" ? "badge-public" : "badge-private"}`}
+                                        >
+                                            {item.viewMode === "PUBLIC" ? (
+                                                <>
+                                                    <Globe className="w-3 h-3" /> Public
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Lock className="w-3 h-3" /> Private
+                                                </>
+                                            )}
+                                        </span>
+                                    </div>
+                                    {/* Remove button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setRemoveTarget({ id: item.id, title: item.title });
+                                        }}
+                                        className="w-7 h-7 flex items-center justify-center cursor-pointer transition-all shrink-0"
+                                        style={{
+                                            borderRadius: "var(--radius-sm)",
+                                            border: "1px solid rgba(239, 68, 68, 0.2)",
+                                            background: "rgba(239, 68, 68, 0.06)",
+                                            color: "#EF4444",
+                                        }}
+                                        title="Loại khỏi bộ sưu tập"
                                     >
-                                        {item.viewMode === "PUBLIC" ? (
-                                            <>
-                                                <Globe className="w-3 h-3" /> Public
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Lock className="w-3 h-3" /> Private
-                                            </>
-                                        )}
-                                    </span>
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
                             </Link>
                         ))}
@@ -618,6 +685,85 @@ export function ListDetailClient({
                 open={addItemsOpen}
                 onClose={() => setAddItemsOpen(false)}
             />
+
+            {/* ─── Remove Item Confirmation ───────────────── */}
+            {removeTarget && (
+                <div
+                    className="dialog-overlay"
+                    onClick={() => !removing && setRemoveTarget(null)}
+                >
+                    <div
+                        className="w-full max-w-sm mx-4 p-6"
+                        style={{
+                            background: "#fff",
+                            borderRadius: "var(--radius-xl)",
+                            boxShadow: "0 25px 60px rgba(0, 0, 0, 0.2)",
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center gap-3 mb-4">
+                            <div
+                                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                                style={{ background: "rgba(239, 68, 68, 0.08)" }}
+                            >
+                                <Trash2 className="w-5 h-5" style={{ color: "#EF4444" }} />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-bold" style={{ color: "#1E293B" }}>
+                                    Loại khỏi bộ sưu tập
+                                </h3>
+                            </div>
+                        </div>
+                        <p className="text-sm mb-5" style={{ color: "var(--muted)", lineHeight: 1.6 }}>
+                            Bạn có muốn loại <strong style={{ color: "#334155" }}>&quot;{removeTarget.title}&quot;</strong> ra khỏi bộ sưu tập này?
+                            <br />
+                            <span className="text-xs" style={{ color: "var(--muted-light)" }}>
+                                ({singleItemLabel} vẫn tồn tại, chỉ bị gỡ khỏi bộ sưu tập)
+                            </span>
+                        </p>
+                        <div className="flex items-center justify-end gap-2">
+                            <button
+                                onClick={() => setRemoveTarget(null)}
+                                disabled={removing}
+                                className="px-4 py-2 text-sm font-medium cursor-pointer transition-colors"
+                                style={{
+                                    borderRadius: "var(--radius-md)",
+                                    border: "1px solid rgba(226,232,240,0.8)",
+                                    background: "transparent",
+                                    color: "var(--muted)",
+                                }}
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                onClick={handleRemoveItem}
+                                disabled={removing}
+                                className="px-5 py-2 text-sm font-semibold cursor-pointer transition-all flex items-center gap-2"
+                                style={{
+                                    borderRadius: "var(--radius-md)",
+                                    background: "linear-gradient(135deg, #EF4444, #DC2626)",
+                                    color: "#fff",
+                                    border: "none",
+                                    boxShadow: "0 2px 8px rgba(239, 68, 68, 0.3)",
+                                    opacity: removing ? 0.7 : 1,
+                                }}
+                            >
+                                {removing ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Đang xóa...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                        Loại ra
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
