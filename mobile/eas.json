@@ -1,0 +1,25 @@
+{
+    "cli": {
+        "version": ">= 5.0.0"
+    },
+    "build": {
+        "preview": {
+            "android": {
+                "buildType": "apk"
+            },
+            "distribution": "internal",
+            "env": {
+                "EXPO_USE_METRO_WORKSPACE_ROOT": "1"
+            },
+            "node": "20.11.0",
+            "cache": {
+                "disabled": true
+            }
+        },
+        "production": {
+            "android": {
+                "buildType": "app-bundle"
+            }
+        }
+    }
+}
