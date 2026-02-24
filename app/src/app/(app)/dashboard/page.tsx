@@ -7,9 +7,7 @@ import {
     Clock,
     Lock,
     ArrowRight,
-    Sparkles,
     TrendingUp,
-    BarChart3,
     Lightbulb,
 } from "lucide-react";
 import Link from "next/link";
@@ -36,9 +34,6 @@ export default async function DashboardPage() {
     const hour = new Date().getHours();
     const greetingKey = hour < 12 ? "dashboard.greetingMorning" : hour < 18 ? "dashboard.greetingAfternoon" : "dashboard.greetingEvening";
 
-    // Weekly activity max for bar height calc
-    const maxActivity = Math.max(...stats.weeklyActivity.map((d) => d.count), 1);
-    const totalWeekly = stats.weeklyActivity.reduce((s, d) => s + d.count, 0);
 
     const statCards = [
         {
@@ -169,105 +164,10 @@ export default async function DashboardPage() {
                 })}
             </div>
 
-            {/* ═══════════ 3. ACTIVITY CHART + TAG DISTRIBUTION ═══════════ */}
-            <div className="grid md:grid-cols-5 gap-4 md:gap-5 mb-6 md:mb-8">
-                {/* Weekly Activity Bar Chart */}
-                <div className="md:col-span-3 glass-card p-4 sm:p-6">
-                    <div className="flex items-center justify-between mb-5">
-                        <h2 className="font-semibold flex items-center gap-2" style={{ color: "#1E293B" }}>
-                            <BarChart3 className="w-4 h-4" style={{ color: "var(--primary)" }} />
-                            {t(locale, "dashboard.weeklyActivity")}
-                        </h2>
-                        <span className="text-sm font-medium" style={{ color: "var(--primary)" }}>
-                            {t(locale, "dashboard.totalAdded", { count: String(totalWeekly) })}
-                        </span>
-                    </div>
-                    <div className="flex items-end gap-2 sm:gap-3 h-[140px]">
-                        {stats.weeklyActivity.map((day, i) => {
-                            const pct = maxActivity > 0 ? (day.count / maxActivity) * 100 : 0;
-                            const isToday = i === stats.weeklyActivity.length - 1;
-                            return (
-                                <div key={day.date} className="flex-1 flex flex-col items-center gap-1.5">
-                                    <span className="text-xs font-medium" style={{ color: "#64748B" }}>
-                                        {day.count > 0 ? day.count : ""}
-                                    </span>
-                                    <div
-                                        className="w-full rounded-lg transition-all"
-                                        style={{
-                                            height: `${Math.max(pct, 6)}%`,
-                                            background: isToday
-                                                ? "var(--primary)"
-                                                : day.count > 0
-                                                    ? "color-mix(in srgb, var(--primary) 40%, transparent)"
-                                                    : "rgba(226,232,240,0.5)",
-                                            minHeight: "8px",
-                                        }}
-                                    />
-                                    <span
-                                        className="text-xs"
-                                        style={{
-                                            color: isToday ? "var(--primary)" : "#94A3B8",
-                                            fontWeight: isToday ? 600 : 400,
-                                        }}
-                                    >
-                                        {day.day}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Tag Distribution */}
-                <div className="md:col-span-2 glass-card p-4 sm:p-6">
-                    <h2 className="font-semibold flex items-center gap-2 mb-5" style={{ color: "#1E293B" }}>
-                        <Tags className="w-4 h-4" style={{ color: "var(--primary)" }} />
-                        {t(locale, "dashboard.tagDistribution")}
-                    </h2>
-                    {stats.topTags.length === 0 ? (
-                        <div className="flex items-center justify-center h-[120px]">
-                            <p className="text-sm" style={{ color: "var(--muted)" }}>
-                                {t(locale, "dashboard.noData")}
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="space-y-2.5">
-                            {stats.topTags.map((tag, i) => {
-                                const totalTagItems = stats.topTags.reduce((s, t) => s + t.count, 0) || 1;
-                                const pct = Math.round((tag.count / totalTagItems) * 100);
-                                return (
-                                    <div key={tag.id} className="flex items-center gap-2.5">
-                                        <div
-                                            className="w-2.5 h-2.5 rounded-full shrink-0"
-                                            style={{ background: TAG_COLORS[i % TAG_COLORS.length] }}
-                                        />
-                                        <span className="text-sm flex-1 truncate" style={{ color: "#475569" }}>
-                                            {tag.name}
-                                        </span>
-                                        <span className="text-xs font-medium tabular-nums" style={{ color: "#94A3B8" }}>
-                                            {tag.count}
-                                        </span>
-                                        <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(226,232,240,0.5)" }}>
-                                            <div
-                                                className="h-full rounded-full"
-                                                style={{
-                                                    width: `${pct}%`,
-                                                    background: TAG_COLORS[i % TAG_COLORS.length],
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* ═══════════ 4. RECENT ITEMS + QUICK ACTIONS ═══════════ */}
-            <div className="grid md:grid-cols-3 gap-4 md:gap-5 mb-6 md:mb-8">
+            {/* ═══════════ 3. RECENT ITEMS ═══════════ */}
+            <div className="mb-6 md:mb-8">
                 {/* Recent Items */}
-                <div className="md:col-span-2 glass-card p-4 sm:p-6">
+                <div className="glass-card p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-5">
                         <h2 className="font-semibold flex items-center gap-2" style={{ color: "#1E293B" }}>
                             <Clock className="w-4 h-4" style={{ color: "var(--primary)" }} />
@@ -339,48 +239,6 @@ export default async function DashboardPage() {
                             ))}
                         </div>
                     )}
-                </div>
-
-                {/* Quick Actions */}
-                <div className="glass-card p-4 sm:p-6">
-                    <h2 className="font-semibold mb-5 flex items-center gap-2" style={{ color: "#1E293B" }}>
-                        <Sparkles className="w-4 h-4" style={{ color: "var(--primary)" }} />
-                        {t(locale, "dashboard.quickActions")}
-                    </h2>
-                    <div className="space-y-2">
-                        <Link
-                            href="/items/new"
-                            className="flex items-center gap-3 p-3 rounded-xl transition-colors font-medium text-sm cursor-pointer"
-                            style={{ background: "color-mix(in srgb, var(--primary) 8%, transparent)", color: "var(--primary)" }}
-                        >
-                            <Plus className="w-[18px] h-[18px]" />
-                            {t(locale, "dashboard.addNewItem", { item: singleItemLabel })}
-                        </Link>
-                        <Link
-                            href="/items"
-                            className="flex items-center gap-3 p-3 rounded-xl transition-colors font-medium text-sm cursor-pointer"
-                            style={{ background: "rgba(100, 116, 139, 0.05)", color: "var(--muted)" }}
-                        >
-                            <Bookmark className="w-[18px] h-[18px]" />
-                            {t(locale, "dashboard.viewAllItems", { item: singleItemLabel })}
-                        </Link>
-                        <Link
-                            href="/lists"
-                            className="flex items-center gap-3 p-3 rounded-xl transition-colors font-medium text-sm cursor-pointer"
-                            style={{ background: "rgba(100, 116, 139, 0.05)", color: "var(--muted)" }}
-                        >
-                            <FolderOpen className="w-[18px] h-[18px]" />
-                            {t(locale, "dashboard.manageCollections")}
-                        </Link>
-                        <Link
-                            href="/tags"
-                            className="flex items-center gap-3 p-3 rounded-xl transition-colors font-medium text-sm cursor-pointer"
-                            style={{ background: "rgba(100, 116, 139, 0.05)", color: "var(--muted)" }}
-                        >
-                            <Tags className="w-[18px] h-[18px]" />
-                            {t(locale, "dashboard.manageTags")}
-                        </Link>
-                    </div>
                 </div>
             </div>
 
