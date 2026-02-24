@@ -677,7 +677,7 @@ export default async function LandingPage() {
       {/* ── FOOTER ────────────────────────────── */}
       < footer className="bg-gray-50 border-t border-gray-100" >
         <div className="max-w-6xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
             <div className="md:col-span-1">
               <Link href="/" className="flex items-center gap-2 mb-4 no-underline">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -695,16 +695,6 @@ export default async function LandingPage() {
               <h4 className="text-gray-900 mb-4" style={{ fontSize: "0.9rem", fontWeight: 600 }}>{t.footerProduct}</h4>
               <ul className="space-y-3">
                 {[t.footerWebApp, t.footerExtension, t.footerMobile].map((item) => (
-                  <li key={item as string}>
-                    <a href="#" className="text-gray-400 hover:text-pink-500 transition-colors no-underline" style={{ fontSize: "0.9rem" }}>{item}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-gray-900 mb-4" style={{ fontSize: "0.9rem", fontWeight: 600 }}>{t.footerResources}</h4>
-              <ul className="space-y-3">
-                {[t.footerUseCases, t.footerBlog, t.footerChangelog].map((item) => (
                   <li key={item as string}>
                     <a href="#" className="text-gray-400 hover:text-pink-500 transition-colors no-underline" style={{ fontSize: "0.9rem" }}>{item}</a>
                   </li>
