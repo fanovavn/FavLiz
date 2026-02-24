@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Heart } from "lucide-react";
 import { getThumbnailColor } from "@/lib/utils";
 import { AttachmentViewer } from "@/components/attachment-viewer";
 
@@ -34,15 +33,12 @@ export function PublicItemView({ item }: PublicItemViewProps) {
                 }}
             >
                 <Link href="/" className="flex items-center gap-2">
-                    <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center"
-                        style={{
-                            background: "linear-gradient(135deg, var(--primary), var(--primary-light))",
-                        }}
-                    >
-                        <Heart className="w-3.5 h-3.5 text-white fill-white" />
-                    </div>
-                    <span className="text-base font-bold gradient-text">FavLiz</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src="/logo.png"
+                        alt="FavLiz"
+                        style={{ height: "24px", width: "auto" }}
+                    />
                 </Link>
                 <span className="text-sm" style={{ color: "var(--muted)" }}>
                     Shared by <strong>{item.user.username ? `@${item.user.username}` : displayName}</strong>

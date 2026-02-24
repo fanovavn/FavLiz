@@ -11,7 +11,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     scheme: "favliz",
     splash: {
         image: "./assets/splash.png",
-        backgroundColor: "#FFF5F5",
+        backgroundColor: "#FFFFFF",
         resizeMode: "contain",
     },
     ios: {
@@ -46,5 +46,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             projectId: "ee346b08-49b8-45e3-a9af-69671839e82a",
         },
     },
-    plugins: ["expo-router", "expo-secure-store"],
+    plugins: [
+        "expo-router",
+        "expo-secure-store",
+        [
+            "expo-share-intent",
+            {
+                iosActivationRules: {
+                    NSExtensionActivationSupportsWebURLWithMaxCount: 1,
+                    NSExtensionActivationSupportsText: true,
+                },
+            },
+        ],
+    ],
 });

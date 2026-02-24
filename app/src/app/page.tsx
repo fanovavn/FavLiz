@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  Heart,
   ArrowRight,
   Chrome,
   Sparkles,
@@ -637,7 +636,13 @@ export default async function LandingPage() {
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
               <div className="relative z-10">
-                <Heart className="w-10 h-10 mx-auto mb-6 text-white/80" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/logo-white.png"
+                  alt="FavLiz"
+                  className="mx-auto mb-6"
+                  style={{ height: "40px", width: "auto", opacity: 0.9 }}
+                />
                 <h2 className="mb-4" style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 800, lineHeight: 1.2 }}>
                   {t.ctaTitle} <br /> {t.ctaTitleBreak}
                 </h2>
@@ -675,12 +680,12 @@ export default async function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
             <div className="md:col-span-1">
               <Link href="/" className="flex items-center gap-2 mb-4 no-underline">
-                <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg flex items-center justify-center">
-                  <Heart className="w-4 h-4 text-white fill-white" />
-                </div>
-                <span className="text-gray-900" style={{ fontSize: "1.2rem", fontWeight: 700 }}>
-                  Fav<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">Liz</span>
-                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/logo.png"
+                  alt="FavLiz"
+                  style={{ height: "28px", width: "auto" }}
+                />
               </Link>
               <p className="text-gray-400" style={{ fontSize: "0.9rem", lineHeight: 1.6 }}>
                 {t.footerTagline}

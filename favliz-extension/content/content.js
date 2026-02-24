@@ -62,8 +62,8 @@
         fab.id = `${FAVLIZ_PREFIX}-fab`;
         fab.title = "Save to FavLiz";
         const fabIconHTML = `
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            <svg width="22" height="22" viewBox="0 0 370 314" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M176.772 0.111476C177.127 0.0411644 177.488 0 177.85 0H178.16C182.597 0.537917 187.8 0.568213 192.036 1.42365C213.304 5.7191 229.208 18.9398 241.912 35.7651C252.528 49.8243 262.227 63.3873 272.253 77.4414L304.277 121.662L331.48 159.156C346.419 179.717 362.203 199.417 367.753 224.682C368.242 226.897 368.947 233.583 369.608 236.531C369.798 237.38 370 238.25 370 239.12V248.157C370 249.054 369.74 249.937 369.547 250.813C369.159 252.579 369.157 255.16 368.847 256.662C368.383 258.928 367.933 261.105 367.378 263.366C363.495 279.735 353.262 293.882 338.939 302.684C328.225 309.169 315.771 312.593 303.432 313.661C275.293 316.356 249.724 302.431 224.994 291.072C208.42 283.457 193.581 278.299 175.032 280.446C161.589 282 148.651 287.834 136.499 293.6C110.801 305.794 85.9416 316.297 56.9824 309.105C50.6683 307.484 44.5566 305.16 38.7626 302.171C17.9249 291.515 7.20299 275.372 1.92503 253.074C1.50321 251.292 1.18955 247.007 0.561624 244.568C0.307439 243.581 0 242.57 0 241.551V232.344C0 231.162 0.314228 229.939 0.527737 228.776C1.04426 225.963 1.40173 220.738 1.69877 219.199C7.121 191.111 25.8354 167.436 41.7507 144.379C53.5497 127.074 65.498 109.871 77.5949 92.7731L103.896 54.5114C113.355 40.7769 122.724 25.2509 136.043 14.788C144.87 7.85368 155.183 3.32668 166.231 1.39229C169.635 0.796452 173.298 0.798666 176.772 0.111476ZM216.351 221.014C229.294 203.799 241.145 188.086 252.049 169.216C265.048 146.72 271.229 123.653 247.914 105.241C240.327 99.2487 230.256 96.7714 220.721 98.1595C206.014 100.309 197.068 109.336 181.92 109.672C164.814 110.051 151.745 95.5442 135.302 97.794C125.009 98.1922 117.031 103 110.189 110.432C104.638 116.463 100.076 126.445 100.402 134.765C101.285 157.321 125.688 189.328 139.001 207.243C147.173 218.24 155.134 229.651 165.329 238.912C170.138 243.281 177.338 246.995 183.975 246.695C192.021 246.33 199.35 241.256 204.582 235.43C208.677 230.87 212.769 225.984 216.351 221.014Z" fill="white"/>
             </svg>
         `;
         fab.innerHTML = fabIconHTML;
@@ -109,129 +109,6 @@
         document.body.appendChild(fabWrapper);
     }
 
-    // ─── Inline Post Buttons ─────────────────────────────────
-    function injectPostButtons() {
-        if (!window.FavLizExtractorRouter || !window.FavLizExtractorRouter.isFeedPage()) return;
-
-        const MARKER = `${FAVLIZ_PREFIX}-post-btn`;
-        let injected = 0;
-
-        // ── Strategy 1: Use extractor's getPostSelector ──────
-        try {
-            const selector = window.FavLizExtractorRouter.getPostSelector();
-            if (selector) {
-                const posts = document.querySelectorAll(selector);
-                posts.forEach((post) => {
-                    if (post.querySelector(`.${MARKER}`)) return;
-                    if (post.offsetHeight < 100) return;
-                    if (injectButtonIntoContainer(post)) injected++;
-                });
-            }
-        } catch (e) {
-            console.warn("[FavLiz] Strategy 1 failed:", e);
-        }
-
-        // ── Strategy 2: Find posts via action menu buttons ───
-        // This is the primary strategy for Facebook — find "..." menu
-        // buttons and walk up to the post container
-        try {
-            const menuSelectors = [
-                '[aria-label="Hành động với bài viết này"]',
-                '[aria-label="Actions for this post"]',
-                '[aria-label="Hành động với bài viết"]',
-                '[aria-label="Actions with this post"]',
-            ];
-            const menuButtons = document.querySelectorAll(menuSelectors.join(", "));
-
-            menuButtons.forEach((menuBtn) => {
-                // Walk up to find a sufficiently large container
-                let container = menuBtn.parentElement;
-                let depth = 0;
-                while (container && depth < 15) {
-                    if (container.offsetHeight >= 200) break;
-                    container = container.parentElement;
-                    depth++;
-                }
-                if (!container || container === document.body) return;
-                if (container.querySelector(`.${MARKER}`)) return;
-
-                if (injectButtonIntoContainer(container)) injected++;
-            });
-        } catch (e) {
-            console.warn("[FavLiz] Strategy 2 failed:", e);
-        }
-
-        if (injected > 0) {
-            console.log(`[FavLiz] Injected ${injected} inline buttons`);
-        }
-    }
-
-    function injectButtonIntoContainer(container) {
-        const MARKER = `${FAVLIZ_PREFIX}-post-btn`;
-        if (container.querySelector(`.${MARKER}`)) return false;
-
-        const btn = document.createElement("button");
-        btn.className = MARKER;
-        btn.title = "Save to FavLiz";
-        btn.innerHTML = `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span>FavLiz</span>
-        `;
-        btn.addEventListener("click", async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Show loading state on the button
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<span class="${FAVLIZ_PREFIX}-spinner" style="width:12px;height:12px;border-width:2px;"></span> <span>Saving...</span>`;
-            btn.disabled = true;
-            btn.style.opacity = "0.7";
-
-            // Try extractFromPost if available
-            if (window.FavLizExtractorRouter.extractPostData) {
-                currentExtractedData = window.FavLizExtractorRouter.extractPostData(container);
-            } else {
-                currentExtractedData = window.FavLizExtractorRouter.extractPageData();
-            }
-            await openSaveModal(currentExtractedData);
-
-            // Restore button after modal is opened
-            btn.innerHTML = originalHTML;
-            btn.disabled = false;
-            btn.style.opacity = "";
-        });
-
-        // Position absolute within the container
-        const computedPos = window.getComputedStyle(container).position;
-        if (computedPos === "static") {
-            container.style.position = "relative";
-        }
-        container.appendChild(btn);
-        return true;
-    }
-
-    // ─── MutationObserver for Infinite Scroll ────────────────
-    let observerDebounceTimer = null;
-
-    function observeNewPosts() {
-        if (!window.FavLizExtractorRouter.isFeedPage()) return;
-
-        const observer = new MutationObserver(() => {
-            // Debounce: wait 500ms after last mutation
-            clearTimeout(observerDebounceTimer);
-            observerDebounceTimer = setTimeout(() => {
-                injectPostButtons();
-            }, 500);
-        });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-        });
-    }
-
     // ─── Save Modal ──────────────────────────────────────────
     async function openSaveModal(data) {
         if (isModalOpen) return;
@@ -251,23 +128,14 @@
     function showLoginModal(pendingData) {
         removeModal();
 
-        const overlay = document.createElement("div");
-        overlay.id = `${FAVLIZ_PREFIX}-overlay`;
-        overlay.addEventListener("click", (e) => {
-            if (e.target === overlay) { closeModal(); }
-        });
-
         const modal = document.createElement("div");
         modal.id = `${FAVLIZ_PREFIX}-modal`;
-        modal.style.maxWidth = "380px";
 
         modal.innerHTML = `
             <div class="${FAVLIZ_PREFIX}-modal-header" style="padding: 20px; flex-direction: column; align-items: flex-start; gap: 4px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                        </svg>
+                        <img src="${chrome.runtime.getURL('assets/icon-48.png')}" alt="FavLiz" width="24" height="24" style="border-radius: 4px;">
                         <span style="font-size: 18px; font-weight: 700; color: white;">FavLiz</span>
                     </div>
                     <button class="${FAVLIZ_PREFIX}-modal-close" id="${FAVLIZ_PREFIX}-close-btn">✕</button>
@@ -301,8 +169,7 @@
             </div>
         `;
 
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
+        document.body.appendChild(modal);
 
         // Focus email input
         setTimeout(() => {
@@ -381,14 +248,8 @@
     }
 
     function createModalOverlay(data, lists, tags) {
-        // Remove existing modal
+        // Remove existing sidebar
         removeModal();
-
-        const overlay = document.createElement("div");
-        overlay.id = `${FAVLIZ_PREFIX}-overlay`;
-        overlay.addEventListener("click", (e) => {
-            if (e.target === overlay) closeModal();
-        });
 
         const modal = document.createElement("div");
         modal.id = `${FAVLIZ_PREFIX}-modal`;
@@ -396,9 +257,7 @@
         modal.innerHTML = `
             <div class="${FAVLIZ_PREFIX}-modal-header">
                 <div class="${FAVLIZ_PREFIX}-modal-logo">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                    </svg>
+                    <img src="${chrome.runtime.getURL('assets/icon-48.png')}" alt="FavLiz" width="20" height="20" style="border-radius: 4px;">
                     <span>Save to FavLiz</span>
                 </div>
                 <div class="${FAVLIZ_PREFIX}-platform-badge">
@@ -474,8 +333,7 @@
             </div>
         `;
 
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
+        document.body.appendChild(modal);
 
         // Setup event listeners
         setupModalListeners(data, lists, tags);
@@ -715,7 +573,9 @@
 
     function removeModal() {
         const overlay = document.getElementById(`${FAVLIZ_PREFIX}-overlay`);
+        const modal = document.getElementById(`${FAVLIZ_PREFIX}-modal`);
         if (overlay) overlay.remove();
+        if (modal) modal.remove();
     }
 
     function onEscKey(e) {
@@ -759,6 +619,16 @@
         }
     }
 
+    function isSameOriginUrl(url1, url2) {
+        try {
+            const a = new URL(url1);
+            const b = new URL(url2);
+            return a.hostname === b.hostname;
+        } catch {
+            return false;
+        }
+    }
+
     // ─── Listen for messages from popup ─────────────────────
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.action === "EXTRACT_PAGE_DATA") {
@@ -782,8 +652,256 @@
                 }
             }
             sendResponse({ success: true });
+        } else if (message.action === "CONTEXT_MENU_SAVE") {
+            // Triggered from right-click context menu — open save modal directly
+            if (message.url) {
+                openSaveModalFromUrl(message.url);
+            }
+            sendResponse({ success: true });
         }
         return true;
+    });
+
+    // ─── Direct Save from URL (used by context menu) ─────────
+    async function openSaveModalFromUrl(url) {
+        if (isModalOpen) return;
+
+        // Show loading overlay immediately
+        showFetchingOverlay(url);
+
+        let data = null;
+
+        // Strategy 1: If URL is same origin, use extractors
+        const currentUrl = window.location.href;
+        if (isSameOriginUrl(url, currentUrl) && window.FavLizExtractorRouter) {
+            try {
+                data = window.FavLizExtractorRouter.extractPageData();
+                if (data) {
+                    data.url = url;
+                    data.attachments = [{ type: "LINK", url }];
+                }
+            } catch (e) {
+                console.warn("[FavLiz] Extractor failed:", e);
+            }
+        }
+
+        // Strategy 2: Fetch metadata via background
+        if (!data || !data.title) {
+            try {
+                const result = await sendMessage("FETCH_URL_METADATA", { url });
+                if (result.success && result.metadata) {
+                    data = {
+                        ...result.metadata,
+                        attachments: [{ type: "LINK", url }],
+                    };
+                }
+            } catch (e) {
+                console.warn("[FavLiz] Metadata fetch failed:", e);
+            }
+        }
+
+        // Strategy 3: Fallback
+        if (!data) {
+            data = {
+                title: "", description: "", url, thumbnail: "",
+                platform: "Website", platformIcon: "🔗",
+                autoTags: [], attachments: [{ type: "LINK", url }],
+            };
+            try {
+                const parsed = new URL(url);
+                data.title = parsed.hostname.replace("www.", "") + parsed.pathname;
+            } catch { data.title = url; }
+        }
+
+        // Remove loading overlay
+        removeFetchingOverlay();
+
+        currentExtractedData = data;
+        await openSaveModal(data);
+    }
+
+    function showFetchingOverlay(url) {
+        removeFetchingOverlay();
+
+        const iconUrl = chrome.runtime.getURL("assets/icon-48.png");
+        let displayHost = "";
+        try { displayHost = new URL(url).hostname.replace("www.", ""); } catch { displayHost = "..."; }
+
+        const overlay = document.createElement("div");
+        overlay.id = `${FAVLIZ_PREFIX}-fetching-overlay`;
+        // Set visible immediately via inline style
+        overlay.style.cssText = "position:fixed!important;inset:0!important;background:rgba(0,0,0,0.55)!important;backdrop-filter:blur(6px)!important;display:flex!important;align-items:center!important;justify-content:center!important;z-index:2147483640!important;font-family:-apple-system,BlinkMacSystemFont,sans-serif!important;";
+        overlay.innerHTML = `
+            <style>@keyframes favlizSpin{to{transform:rotate(360deg)}}</style>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:32px 40px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);border-radius:20px;min-width:180px;">
+                <img src="${iconUrl}" alt="FavLiz" width="36" height="36" style="border-radius:10px;">
+                <div style="width:24px;height:24px;border:3px solid rgba(255,255,255,0.15);border-top-color:white;border-radius:50%;animation:favlizSpin 0.8s linear infinite;"></div>
+                <p style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.92);margin:0;">Loading info...</p>
+                <p style="font-size:12px;color:rgba(255,255,255,0.45);margin:0;font-family:monospace;">${escapeHtml(displayHost)}</p>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    function removeFetchingOverlay() {
+        const el = document.getElementById(`${FAVLIZ_PREFIX}-fetching-overlay`);
+        if (el) el.remove();
+    }
+
+    // ─── Clipboard URL Prompt ─────────────────────────────────
+    let clipboardPromptTimeout = null;
+
+    function showClipboardPrompt(url) {
+        // Don't show if modal is already open
+        if (isModalOpen) return;
+
+        // Remove existing prompt
+        dismissClipboardPrompt();
+
+        const prompt = document.createElement("div");
+        prompt.id = `${FAVLIZ_PREFIX}-clipboard-prompt`;
+
+        const iconUrl = chrome.runtime.getURL("assets/icon-48.png");
+        const displayUrl = truncateClipboardUrl(url);
+
+        prompt.innerHTML = `
+            <div class="${FAVLIZ_PREFIX}-clipboard-header">
+                <div class="${FAVLIZ_PREFIX}-clipboard-header-left">
+                    <img src="${iconUrl}" alt="FavLiz" width="20" height="20">
+                    <span class="${FAVLIZ_PREFIX}-clipboard-header-text">📋 Link copied — Save to FavLiz?</span>
+                </div>
+                <button class="${FAVLIZ_PREFIX}-clipboard-close" id="${FAVLIZ_PREFIX}-clipboard-close-btn">✕</button>
+            </div>
+            <div class="${FAVLIZ_PREFIX}-clipboard-body">
+                <div class="${FAVLIZ_PREFIX}-clipboard-url">
+                    <svg class="${FAVLIZ_PREFIX}-clipboard-url-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    <span class="${FAVLIZ_PREFIX}-clipboard-url-text" title="${escapeAttr(url)}">${escapeHtml(displayUrl)}</span>
+                </div>
+                <div class="${FAVLIZ_PREFIX}-clipboard-actions">
+                    <button class="${FAVLIZ_PREFIX}-clipboard-save" id="${FAVLIZ_PREFIX}-clipboard-save-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        Save now
+                    </button>
+                    <button class="${FAVLIZ_PREFIX}-clipboard-dismiss" id="${FAVLIZ_PREFIX}-clipboard-dismiss-btn">No thanks</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(prompt);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                prompt.classList.add("show");
+            });
+        });
+
+        // Bind events
+        document.getElementById(`${FAVLIZ_PREFIX}-clipboard-close-btn`).addEventListener("click", dismissClipboardPrompt);
+        document.getElementById(`${FAVLIZ_PREFIX}-clipboard-dismiss-btn`).addEventListener("click", dismissClipboardPrompt);
+        document.getElementById(`${FAVLIZ_PREFIX}-clipboard-save-btn`).addEventListener("click", async () => {
+            const saveBtn = document.getElementById(`${FAVLIZ_PREFIX}-clipboard-save-btn`);
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = `<span class="${FAVLIZ_PREFIX}-spinner" style="width:14px;height:14px;border-width:2px;"></span> Loading...`;
+
+            dismissClipboardPrompt();
+
+            let data = null;
+
+            // Strategy 1: If copied URL is the current page, use extractors (same as FAB)
+            const currentUrl = window.location.href;
+            const isSamePage = isSameOriginUrl(url, currentUrl);
+
+            if (isSamePage && window.FavLizExtractorRouter) {
+                try {
+                    data = window.FavLizExtractorRouter.extractPageData();
+                    // Override URL with the exact copied URL (it may have different params)
+                    if (data) {
+                        data.url = url;
+                        data.attachments = [{ type: "LINK", url: url }];
+                    }
+                } catch (e) {
+                    console.warn("[FavLiz] Extractor failed for clipboard URL:", e);
+                }
+            }
+
+            // Strategy 2: Fetch metadata from the URL via background script
+            if (!data || !data.title) {
+                try {
+                    const result = await sendMessage("FETCH_URL_METADATA", { url });
+                    if (result.success && result.metadata) {
+                        data = {
+                            ...result.metadata,
+                            attachments: [{ type: "LINK", url: url }],
+                        };
+                    }
+                } catch (e) {
+                    console.warn("[FavLiz] Metadata fetch failed:", e);
+                }
+            }
+
+            // Strategy 3: Fallback to minimal data
+            if (!data) {
+                data = {
+                    title: "",
+                    description: "",
+                    url: url,
+                    thumbnail: "",
+                    platform: "Website",
+                    platformIcon: "🔗",
+                    autoTags: [],
+                    attachments: [{ type: "LINK", url: url }],
+                };
+                try {
+                    const parsed = new URL(url);
+                    data.title = parsed.hostname.replace("www.", "") + parsed.pathname;
+                    if (data.title.length > 80) data.title = data.title.slice(0, 77) + "...";
+                } catch {
+                    data.title = url;
+                }
+            }
+
+            currentExtractedData = data;
+            await openSaveModal(data);
+        });
+
+        // Auto-dismiss after 8 seconds
+        clipboardPromptTimeout = setTimeout(() => {
+            dismissClipboardPrompt();
+        }, 8000);
+    }
+
+    function dismissClipboardPrompt() {
+        clearTimeout(clipboardPromptTimeout);
+        const prompt = document.getElementById(`${FAVLIZ_PREFIX}-clipboard-prompt`);
+        if (prompt) {
+            prompt.classList.remove("show");
+            prompt.classList.add("hiding");
+            setTimeout(() => prompt.remove(), 350);
+        }
+    }
+
+    function truncateClipboardUrl(url) {
+        try {
+            const u = new URL(url);
+            const full = u.hostname + u.pathname + u.search;
+            return full.length > 50 ? full.slice(0, 47) + "..." : full;
+        } catch {
+            return url.length > 50 ? url.slice(0, 47) + "..." : url;
+        }
+    }
+
+    // Listen for clipboard URL events from clipboard-watcher.js
+    window.addEventListener("favliz-url-copied", (e) => {
+        if (e.detail && e.detail.url) {
+            console.log("[FavLiz] URL copied detected:", e.detail.url, "source:", e.detail.source);
+            showClipboardPrompt(e.detail.url);
+        }
     });
 
     // ─── Initialize ─────────────────────────────────────────
@@ -796,28 +914,6 @@
             console.log("[FavLiz] Floating button created");
         } catch (err) {
             console.error("[FavLiz] Failed to create floating button:", err);
-        }
-
-        // If it's a feed page, inject inline buttons with retry
-        try {
-            if (window.FavLizExtractorRouter && window.FavLizExtractorRouter.isFeedPage()) {
-                console.log("[FavLiz] Feed page detected — starting inline injection");
-                injectPostButtons();
-                observeNewPosts();
-
-                // Retry injection several times (Facebook loads posts async)
-                const retryDelays = [1000, 2000, 4000, 7000, 12000];
-                retryDelays.forEach((delay) => {
-                    setTimeout(() => {
-                        injectPostButtons();
-                        console.log(`[FavLiz] Retry injection at ${delay}ms`);
-                    }, delay);
-                });
-            } else {
-                console.log("[FavLiz] Single-content mode: floating button only");
-            }
-        } catch (err) {
-            console.error("[FavLiz] Failed to inject post buttons:", err);
         }
     }
 

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-    Heart,
     Unlink,
     Bookmark,
     FolderOpen,
@@ -53,24 +52,12 @@ export default function NotFound() {
             {/* Header */}
             <header className="px-6 py-4 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2" style={{ textDecoration: "none" }}>
-                    <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{
-                            background: "linear-gradient(135deg, #DB2777, #EC4899)",
-                        }}
-                    >
-                        <Heart className="w-4 h-4 text-white fill-white" />
-                    </div>
-                    <span
-                        className="text-lg font-bold"
-                        style={{
-                            background: "linear-gradient(135deg, #DB2777, #EC4899)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                        }}
-                    >
-                        FavLiz
-                    </span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src="/logo.png"
+                        alt="FavLiz"
+                        style={{ height: "28px", width: "auto" }}
+                    />
                 </Link>
                 <div className="flex items-center gap-3">
                     <Link

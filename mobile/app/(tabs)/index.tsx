@@ -35,7 +35,7 @@ export default function DashboardScreen() {
     const displayName = user?.name || user?.username || user?.email?.split("@")[0] || "User";
     const hour = new Date().getHours();
     const greeting = hour < 12 ? "Chào buổi sáng" : hour < 18 ? "Chào buổi chiều" : "Chào buổi tối";
-    const maxActivity = Math.max(...stats.weeklyActivity.map((d) => d.count), 1);
+
 
     const statCards = [
         { label: "Items", value: stats.itemsCount, icon: "bookmark-outline" as const, color: Colors.primary, route: "/(tabs)/items" },
@@ -86,34 +86,7 @@ export default function DashboardScreen() {
                 ))}
             </View>
 
-            {/* Weekly Activity */}
-            <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                    <Ionicons name="bar-chart-outline" size={20} color={Colors.text} />
-                    <Text style={styles.sectionTitle}> Hoạt động tuần</Text>
-                </View>
-                <View style={styles.chart}>
-                    {stats.weeklyActivity.map((day, i) => {
-                        const pct = maxActivity > 0 ? (day.count / maxActivity) * 100 : 0;
-                        const isToday = i === stats.weeklyActivity.length - 1;
-                        return (
-                            <View key={day.date} style={styles.chartBar}>
-                                <Text style={styles.chartCount}>{day.count > 0 ? day.count : ""}</Text>
-                                <View
-                                    style={[
-                                        styles.bar,
-                                        {
-                                            height: `${Math.max(pct, 8)}%` as never,
-                                            backgroundColor: isToday ? Colors.primary : day.count > 0 ? Colors.primaryLight : Colors.border,
-                                        },
-                                    ]}
-                                />
-                                <Text style={[styles.chartDay, isToday ? { color: Colors.primary, fontWeight: "700" } : undefined]}>{day.day}</Text>
-                            </View>
-                        );
-                    })}
-                </View>
-            </View>
+
 
             {/* Recent Items */}
             <View style={styles.section}>
@@ -202,11 +175,7 @@ const styles = StyleSheet.create({
     sectionHeader: { flexDirection: "row", alignItems: "center", marginBottom: Spacing.md },
     sectionTitle: { fontSize: FontSize.lg, fontWeight: "700", color: Colors.text },
     seeAll: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: "600" },
-    chart: { flexDirection: "row", height: 120, alignItems: "flex-end", gap: 6, backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, padding: Spacing.md },
-    chartBar: { flex: 1, alignItems: "center", justifyContent: "flex-end", height: "100%" },
-    chartCount: { fontSize: FontSize.xs, color: Colors.textSecondary, marginBottom: 4 },
-    bar: { width: "70%", borderRadius: 4, minHeight: 4 },
-    chartDay: { fontSize: FontSize.xs, color: Colors.textMuted, marginTop: 4 },
+
     recentItem: {
         flexDirection: "row", alignItems: "center", gap: Spacing.md, padding: Spacing.md,
         backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, marginBottom: Spacing.sm,

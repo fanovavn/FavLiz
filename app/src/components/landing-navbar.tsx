@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { LandingLogoutButton } from "./landing-logout-button";
 import { LandingLanguageSwitcher } from "./landing-language-switcher";
 import { trackEvent } from "@/lib/firebase";
@@ -30,12 +30,12 @@ export function LandingNavbar({ isLoggedIn, userName, locale, t }: LandingNavbar
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 no-underline shrink-0">
-                    <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg flex items-center justify-center">
-                        <Heart className="w-4 h-4 text-white fill-white" />
-                    </div>
-                    <span className="text-xl font-bold text-gray-900">
-                        Fav<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">Liz</span>
-                    </span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src="/logo.png"
+                        alt="FavLiz"
+                        style={{ height: "28px", width: "auto" }}
+                    />
                 </Link>
 
                 {/* Desktop nav links */}

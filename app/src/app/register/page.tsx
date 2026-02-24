@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, Mail, Lock, Eye, EyeOff, ArrowRight, KeyRound } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, KeyRound } from "lucide-react";
 import { signUp, verifyOtp } from "@/lib/auth-actions";
 import { useAuthLocale } from "@/hooks/use-auth-locale";
 import { LandingLanguageSwitcher } from "@/components/landing-language-switcher";
@@ -112,10 +112,14 @@ export default function RegisterPage() {
                 {/* Logo */}
                 <Link
                     href="/"
-                    className="flex items-center justify-center gap-2 mb-8 no-underline auth-slide-down"
+                    className="flex items-center justify-center mb-8 no-underline auth-slide-down"
                 >
-                    <Heart className="w-8 h-8 fill-pink-500" style={{ color: "#DB2777" }} />
-                    <span className="text-2xl font-bold landing-gradient-text">FavLiz</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src="/logo.png"
+                        alt="FavLiz"
+                        style={{ height: "36px", width: "auto" }}
+                    />
                 </Link>
 
                 {/* Card */}

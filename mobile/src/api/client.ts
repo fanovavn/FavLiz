@@ -1,7 +1,8 @@
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl || "http://localhost:3000";
+const API_URL = Constants.expoConfig?.extra?.apiUrl || "https://www.favliz.com";
+console.log("[API] Base URL:", API_URL);
 
 type RequestOptions = {
     method?: string;
@@ -116,3 +117,40 @@ export const api = {
     delete: <T = unknown>(path: string) =>
         apiRequest<T>(path, { method: "DELETE" }),
 };
+
+// Upload file (image) to server
+export async function uploadFile(fileUri: string): Promise<string> {
+    const token = await getToken();
+
+    // Get file info from URI
+    const filename = fileUri.split("/").pop() || "image.jpg";
+    const ext = filename.split(".").pop()?.toLowerCase() || "jpg";
+    const mimeType = ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : ext === "gif" ? "image/gif" : "image/jpeg";
+
+    const formData = new FormData();
+    formData.append("file", {
+        uri: fileUri,
+        name: filename,
+        type: mimeType,
+    } as unknown as Blob);
+
+    const url = `${API_URL}/api/mobile/upload`;
+    const headers: Record<string, string> = {};
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw new Error(data.error || "Upload thất bại");
+    }
+
+    return data.url;
+}

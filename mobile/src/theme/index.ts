@@ -39,6 +39,14 @@ export const FontSize = {
     xxxl: 28,
 };
 
+export const FontFamily = {
+    regular: "PlusJakartaSans-Regular",
+    medium: "PlusJakartaSans-Medium",
+    semiBold: "PlusJakartaSans-SemiBold",
+    bold: "PlusJakartaSans-Bold",
+    extraBold: "PlusJakartaSans-ExtraBold",
+};
+
 export const BorderRadius = {
     sm: 8,
     md: 12,

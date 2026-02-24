@@ -66,13 +66,18 @@ async function showMainView(user) {
 
     // Initialize FAB toggle state
     try {
-        const stored = await chrome.storage.local.get(["fabHidden"]);
+        const stored = await chrome.storage.local.get(["fabHidden", "clipboardWatcherEnabled"]);
         const fabToggle = document.getElementById("fab-toggle");
         if (fabToggle) {
             fabToggle.checked = !stored.fabHidden;
         }
+        const clipboardToggle = document.getElementById("clipboard-toggle");
+        if (clipboardToggle) {
+            // Default to enabled (true) if not set
+            clipboardToggle.checked = stored.clipboardWatcherEnabled !== false;
+        }
     } catch (e) {
-        console.warn("[FavLiz Popup] Could not read fabHidden:", e);
+        console.warn("[FavLiz Popup] Could not read settings:", e);
     }
 
     // Extract page data from active tab
@@ -188,6 +193,17 @@ document.getElementById("logout-btn").addEventListener("click", async () => {
     await sendMessage("LOGOUT");
     showView("login");
     pageData = null;
+});
+
+// ─── Clipboard Watcher Toggle ────────────────────────────────
+document.getElementById("clipboard-toggle").addEventListener("change", async (e) => {
+    const enabled = e.target.checked;
+
+    try {
+        await chrome.storage.local.set({ clipboardWatcherEnabled: enabled });
+    } catch (err) {
+        console.warn("[FavLiz Popup] Could not save clipboardWatcherEnabled:", err);
+    }
 });
 
 // ─── Open Dashboard (with session sync) ─────────────────────

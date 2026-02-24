@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-    Heart,
     Mail,
     ArrowRight,
     CheckCircle2,
@@ -113,10 +112,14 @@ export default function ForgotPasswordPage() {
                 {/* Logo */}
                 <Link
                     href="/"
-                    className="flex items-center justify-center gap-2 mb-8 no-underline auth-slide-down"
+                    className="flex items-center justify-center mb-8 no-underline auth-slide-down"
                 >
-                    <Heart className="w-8 h-8 fill-pink-500" style={{ color: "#DB2777" }} />
-                    <span className="text-2xl font-bold landing-gradient-text">FavLiz</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src="/logo.png"
+                        alt="FavLiz"
+                        style={{ height: "36px", width: "auto" }}
+                    />
                 </Link>
 
                 {/* Card */}

@@ -1,6 +1,8 @@
 package com.favliz.app
 import expo.modules.splashscreen.SplashScreenManager
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 
@@ -21,6 +23,30 @@ class MainActivity : ReactActivity() {
     SplashScreenManager.registerOnActivity(this)
     // @generated end expo-splashscreen
     super.onCreate(null)
+    handleShareIntent(intent)
+  }
+
+  override fun onNewIntent(intent: Intent?) {
+    super.onNewIntent(intent)
+    handleShareIntent(intent)
+  }
+
+  private fun handleShareIntent(intent: Intent?) {
+    if (intent == null) return
+    if (intent.action == Intent.ACTION_SEND && intent.type?.startsWith("text/") == true) {
+      val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
+      val sharedSubject = intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: ""
+
+      val encodedUrl = Uri.encode(sharedText)
+      val encodedTitle = Uri.encode(sharedSubject)
+      val deepLink = "favliz://item-form?sharedUrl=$encodedUrl&sharedTitle=$encodedTitle"
+
+      intent.action = null
+
+      val linkingIntent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLink))
+      linkingIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+      onNewIntent(linkingIntent)
+    }
   }
 
   /**

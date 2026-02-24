@@ -24,6 +24,15 @@
             "matches": [
                 "<all_urls>"
             ],
+            "js": [
+                "content/clipboard-watcher.js"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "<all_urls>"
+            ],
             "css": [
                 "content/content.css"
             ],
@@ -50,10 +59,23 @@
     "permissions": [
         "activeTab",
         "storage",
-        "tabs"
+        "tabs",
+        "contextMenus"
     ],
     "host_permissions": [
         "http://localhost:3000/*",
         "https://*.favliz.com/*"
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "assets/icon-16.png",
+                "assets/icon-48.png",
+                "assets/icon-128.png"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
     ]
 }

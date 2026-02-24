@@ -4,6 +4,29 @@
 
 const API_BASE = "https://www.favliz.com/api/extension";
 
+// ─── Context Menu (Right-click "Add link to FavLiz") ─────────
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.contextMenus.create({
+        id: "favliz-save-link",
+        title: "Add link to FavLiz",
+        contexts: ["link"],
+    });
+});
+
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    if (!tab?.id || info.menuItemId !== "favliz-save-link") return;
+    if (!info.linkUrl) return;
+
+    try {
+        await chrome.tabs.sendMessage(tab.id, {
+            action: "CONTEXT_MENU_SAVE",
+            url: info.linkUrl,
+        });
+    } catch {
+        console.warn("[FavLiz SW] Content script not ready");
+    }
+});
+
 // ─── Token Management ────────────────────────────────────────
 async function getToken() {
     const result = await chrome.storage.local.get(["access_token"]);
@@ -166,6 +189,103 @@ async function handleMessage(message) {
             }
             // Fallback: user not logged in, just open dashboard directly
             return { success: true, url: `https://www.favliz.com${redirect}` };
+        }
+
+        case "FETCH_URL_METADATA": {
+            try {
+                const { url } = payload;
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "User-Agent": "Mozilla/5.0 (compatible; FavLiz/1.0)",
+                        "Accept": "text/html",
+                    },
+                    redirect: "follow",
+                });
+
+                if (!response.ok) {
+                    return { success: false, error: "Failed to fetch URL" };
+                }
+
+                const html = await response.text();
+
+                // Parse meta tags from HTML
+                const getMetaContent = (property) => {
+                    // Try og: tags first, then standard meta
+                    const patterns = [
+                        new RegExp(`<meta[^>]+(?:property|name)=["']${property}["'][^>]+content=["']([^"']*)["']`, "i"),
+                        new RegExp(`<meta[^>]+content=["']([^"']*?)["'][^>]+(?:property|name)=["']${property}["']`, "i"),
+                    ];
+                    for (const pattern of patterns) {
+                        const match = html.match(pattern);
+                        if (match && match[1]) return match[1].trim();
+                    }
+                    return "";
+                };
+
+                // Extract title
+                let title = getMetaContent("og:title") || getMetaContent("twitter:title");
+                if (!title) {
+                    const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+                    if (titleMatch) title = titleMatch[1].trim();
+                }
+
+                // Extract description
+                const description = getMetaContent("og:description")
+                    || getMetaContent("twitter:description")
+                    || getMetaContent("description");
+
+                // Extract thumbnail
+                const thumbnail = getMetaContent("og:image")
+                    || getMetaContent("twitter:image")
+                    || getMetaContent("twitter:image:src");
+
+                // Detect platform
+                const parsed = new URL(url);
+                const host = parsed.hostname.replace("www.", "");
+                let platform = host;
+                let platformIcon = "🌐";
+                const platformMap = {
+                    "youtube.com": { name: "YouTube", icon: "🎬" },
+                    "youtu.be": { name: "YouTube", icon: "🎬" },
+                    "facebook.com": { name: "Facebook", icon: "📘" },
+                    "fb.com": { name: "Facebook", icon: "📘" },
+                    "instagram.com": { name: "Instagram", icon: "📸" },
+                    "tiktok.com": { name: "TikTok", icon: "🎵" },
+                    "reddit.com": { name: "Reddit", icon: "🔴" },
+                    "twitter.com": { name: "Twitter/X", icon: "🐦" },
+                    "x.com": { name: "Twitter/X", icon: "🐦" },
+                    "github.com": { name: "GitHub", icon: "🐙" },
+                    "medium.com": { name: "Medium", icon: "📝" },
+                    "linkedin.com": { name: "LinkedIn", icon: "💼" },
+                };
+                for (const [domain, info] of Object.entries(platformMap)) {
+                    if (host.includes(domain)) {
+                        platform = info.name;
+                        platformIcon = info.icon;
+                        break;
+                    }
+                }
+
+                // Auto-detect tags from platform
+                const autoTags = [];
+                if (platform !== host) autoTags.push(platform);
+
+                return {
+                    success: true,
+                    metadata: {
+                        title: title || host + parsed.pathname,
+                        description: description || "",
+                        thumbnail: thumbnail || "",
+                        url: url,
+                        platform,
+                        platformIcon,
+                        autoTags,
+                    },
+                };
+            } catch (err) {
+                return { success: false, error: err.message };
+            }
         }
 
         default:

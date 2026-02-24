@@ -22,9 +22,7 @@
         <div id="login-view" class="view">
             <div class="popup-header gradient-bg">
                 <div class="logo">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                    </svg>
+                    <img src="../assets/icon-48.png" alt="FavLiz" width="24" height="24" style="border-radius: 4px;">
                     <span>FavLiz</span>
                 </div>
                 <p class="tagline">Save your favorites</p>
@@ -58,9 +56,8 @@
             <div class="popup-header gradient-bg">
                 <div class="header-row">
                     <div class="logo">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                        </svg>
+                        <img src="../assets/icon-48.png" alt="FavLiz" width="20" height="20"
+                            style="border-radius: 4px;">
                         <span>FavLiz</span>
                     </div>
                     <div class="user-info">
@@ -115,6 +112,20 @@
                         </div>
                         <label class="toggle-switch">
                             <input type="checkbox" id="fab-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                            </svg>
+                            <span>Detect copied links</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="clipboard-toggle" checked>
                             <span class="toggle-slider"></span>
                         </label>
                     </div>

@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-    Heart,
     LayoutDashboard,
     Bookmark,
     FolderOpen,
@@ -166,21 +165,15 @@ export function AppSidebar({ userEmail, itemsLabel = "Items" }: AppSidebarProps)
                 {/* Logo */}
                 <Link
                     href="/dashboard"
-                    className="flex items-center gap-3 px-6 py-5"
+                    className="flex items-center px-6 py-4"
                     style={{ borderBottom: "1px solid rgba(226,232,240,0.5)" }}
                 >
-                    <div
-                        className="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style={{
-                            background:
-                                "linear-gradient(135deg, var(--primary), var(--primary-light))",
-                        }}
-                    >
-                        <Heart className="w-4 h-4 text-white fill-white" />
-                    </div>
-                    <span className="text-lg font-bold gradient-text">
-                        FavLiz
-                    </span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src="/logo.png"
+                        alt="FavLiz"
+                        style={{ height: "28px", width: "auto" }}
+                    />
                 </Link>
 
                 {/* Nav */}
