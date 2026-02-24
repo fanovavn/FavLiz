@@ -23,7 +23,10 @@ export const metadata: Metadata = {
     "FavLiz giúp bạn lưu trữ và quản lý danh sách các items yêu thích một cách gọn gàng và đẹp mắt.",
   keywords: ["favorites", "bookmarks", "lists", "organizer", "favliz"],
   icons: {
-    icon: "/favicon.png",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
     apple: "/icon-192.png",
   },
   openGraph: {
