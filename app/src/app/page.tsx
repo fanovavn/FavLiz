@@ -638,10 +638,10 @@ export default async function LandingPage() {
               <div className="relative z-10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/logo-white.png"
+                  src="/icon-white.svg"
                   alt="FavLiz"
                   className="mx-auto mb-6"
-                  style={{ height: "40px", width: "auto", opacity: 0.9 }}
+                  style={{ height: "48px", width: "auto", opacity: 0.9 }}
                 />
                 <h2 className="mb-4" style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 800, lineHeight: 1.2 }}>
                   {t.ctaTitle} <br /> {t.ctaTitleBreak}
@@ -704,11 +704,12 @@ export default async function LandingPage() {
             <div>
               <h4 className="text-gray-900 mb-4" style={{ fontSize: "0.9rem", fontWeight: 600 }}>{t.footerLegal}</h4>
               <ul className="space-y-3">
-                {[t.footerPrivacy, t.footerTerms].map((item) => (
-                  <li key={item as string}>
-                    <a href="#" className="text-gray-400 hover:text-pink-500 transition-colors no-underline" style={{ fontSize: "0.9rem" }}>{item}</a>
-                  </li>
-                ))}
+                <li>
+                  <Link href="/privacy" className="text-gray-400 hover:text-pink-500 transition-colors no-underline" style={{ fontSize: "0.9rem" }}>{t.footerPrivacy}</Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="text-gray-400 hover:text-pink-500 transition-colors no-underline" style={{ fontSize: "0.9rem" }}>{t.footerTerms}</Link>
+                </li>
               </ul>
             </div>
           </div>

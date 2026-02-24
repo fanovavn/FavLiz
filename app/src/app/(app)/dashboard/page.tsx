@@ -262,37 +262,6 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            {/* ═══════════ 6. TIP BANNER ═══════════ */}
-            <div
-                className="glass-card p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3"
-                style={{ border: "1px solid color-mix(in srgb, var(--primary) 15%, transparent)", background: "color-mix(in srgb, var(--primary) 3%, transparent)" }}
-            >
-                <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: "color-mix(in srgb, var(--primary) 10%, transparent)" }}
-                >
-                    <Lightbulb className="w-5 h-5" style={{ color: "var(--primary)" }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm" style={{ color: "var(--foreground)" }}>
-                        {t(locale, "dashboard.tipTitle")}
-                    </p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>
-                        {t(locale, "dashboard.tipDesc")}
-                    </p>
-                </div>
-                <Link
-                    href="/tags"
-                    className="shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
-                    style={{
-                        background: "var(--primary)",
-                        color: "white",
-                    }}
-                >
-                    {t(locale, "dashboard.tryNow")}
-                </Link>
-            </div>
-
             {/* ═══════════ RECENT ITEMS ═══════════ */}
             <div className="mb-6 md:mb-8">
                 <div className="glass-card p-4 sm:p-6">

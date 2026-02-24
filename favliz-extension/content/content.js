@@ -208,7 +208,12 @@
                 setTimeout(async () => {
                     removeModal();
                     isModalOpen = false;
-                    await openSaveModal(pendingData);
+                    // If we have a URL but no real data, fetch metadata first
+                    if (pendingData?.url && !pendingData.title) {
+                        await openSaveModalFromUrl(pendingData.url);
+                    } else {
+                        await openSaveModal(pendingData);
+                    }
                 }, 800);
             } else {
                 errorEl.textContent = result.error || "Đăng nhập thất bại";
@@ -461,7 +466,10 @@
             if (result.success) {
                 saveBtn.innerHTML = `✅ Saved!`;
                 saveBtn.classList.add("success");
-                showToast("Saved to FavLiz successfully!", "success");
+                showToast("Saved to FavLiz successfully!", "success", {
+                    countdown: 5,
+                    link: "https://www.favliz.com/items",
+                });
                 setTimeout(() => closeModal(), 1200);
             } else {
                 saveBtn.disabled = false;
@@ -582,21 +590,65 @@
         if (e.key === "Escape") closeModal();
     }
 
-    function showToast(message, type = "info") {
+    function showToast(message, type = "info", opts = {}) {
         const existing = document.getElementById(`${FAVLIZ_PREFIX}-toast`);
         if (existing) existing.remove();
+        if (existing?._timer) clearInterval(existing._timer);
 
         const toast = document.createElement("div");
         toast.id = `${FAVLIZ_PREFIX}-toast`;
         toast.className = `${FAVLIZ_PREFIX}-toast ${FAVLIZ_PREFIX}-toast-${type}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
 
-        setTimeout(() => toast.classList.add("show"), 10);
-        setTimeout(() => {
-            toast.classList.remove("show");
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        if (opts.countdown && opts.link) {
+            // Enhanced success toast with countdown + link
+            let remaining = opts.countdown;
+            toast.innerHTML = `
+                <div class="${FAVLIZ_PREFIX}-toast-row">
+                    <span class="${FAVLIZ_PREFIX}-toast-icon">✅</span>
+                    <span class="${FAVLIZ_PREFIX}-toast-msg">${escapeHtml(message)}</span>
+                    <button class="${FAVLIZ_PREFIX}-toast-close" id="${FAVLIZ_PREFIX}-toast-close">✕</button>
+                </div>
+                <a href="${escapeAttr(opts.link)}" target="_blank" rel="noopener" class="${FAVLIZ_PREFIX}-toast-link" id="${FAVLIZ_PREFIX}-toast-link">
+                    📂 View in FavLiz
+                </a>
+                <div class="${FAVLIZ_PREFIX}-toast-progress">
+                    <div class="${FAVLIZ_PREFIX}-toast-progress-bar" id="${FAVLIZ_PREFIX}-toast-bar"></div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.add("show"), 10);
+
+            const bar = document.getElementById(`${FAVLIZ_PREFIX}-toast-bar`);
+            const totalMs = remaining * 1000;
+            const startTime = Date.now();
+
+            const interval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const pct = Math.max(0, 100 - (elapsed / totalMs) * 100);
+                if (bar) bar.style.width = `${pct}%`;
+                if (elapsed >= totalMs) {
+                    clearInterval(interval);
+                    toast.classList.remove("show");
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 50);
+            toast._timer = interval;
+
+            // Close button
+            document.getElementById(`${FAVLIZ_PREFIX}-toast-close`)?.addEventListener("click", () => {
+                clearInterval(interval);
+                toast.classList.remove("show");
+                setTimeout(() => toast.remove(), 300);
+            });
+        } else {
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.add("show"), 10);
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
     }
 
     function escapeHtml(str) {
@@ -665,6 +717,14 @@
     // ─── Direct Save from URL (used by context menu) ─────────
     async function openSaveModalFromUrl(url) {
         if (isModalOpen) return;
+
+        // Check auth FIRST — don't waste time fetching if not logged in
+        const authState = await sendMessage("GET_AUTH_STATE");
+        if (!authState.isLoggedIn) {
+            isModalOpen = true;
+            showLoginModal({ url, title: "", description: "", thumbnail: "", platform: "Website", platformIcon: "🔗", autoTags: [], attachments: [{ type: "LINK", url }] });
+            return;
+        }
 
         // Show loading overlay immediately
         showFetchingOverlay(url);
@@ -810,6 +870,14 @@
             saveBtn.innerHTML = `<span class="${FAVLIZ_PREFIX}-spinner" style="width:14px;height:14px;border-width:2px;"></span> Loading...`;
 
             dismissClipboardPrompt();
+
+            // Check auth FIRST
+            const authState = await sendMessage("GET_AUTH_STATE");
+            if (!authState.isLoggedIn) {
+                isModalOpen = true;
+                showLoginModal({ url, title: "", description: "", thumbnail: "", platform: "Website", platformIcon: "🔗", autoTags: [], attachments: [{ type: "LINK", url }] });
+                return;
+            }
 
             let data = null;
 
