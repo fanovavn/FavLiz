@@ -627,9 +627,8 @@ a.stat-card {
 
   /* ── Mobile Page Layout Adjustments ─────── */
   .page-header-responsive {
-    flex-direction: column;
-    align-items: flex-start !important;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   /* ── Mobile glass-card adjustments ──────── */

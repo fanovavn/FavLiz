@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { updateProfile, changePassword, updateThemeColor, updateItemsLabel, updateLanguage } from "@/lib/user-actions";
+import { signOut } from "@/lib/auth-actions";
 import { LOCALE_NAMES, LOCALE_FLAGS, SUPPORTED_LOCALES, type Locale } from "@/lib/i18n";
 import {
     User,
@@ -19,6 +20,7 @@ import {
     Bell,
     Type,
     ChevronDown,
+    LogOut,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
@@ -981,6 +983,25 @@ export function SettingsForm({ profile }: SettingsFormProps) {
                             </p>
                         </div>
                     )}
+
+                    {/* ═══ LOGOUT (mobile-visible) ═══ */}
+                    <div className="mt-8 pt-6" style={{ borderTop: "1px solid rgba(226,232,240,0.5)" }}>
+                        <form action={signOut}>
+                            <button
+                                type="submit"
+                                className="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold cursor-pointer transition-all"
+                                style={{
+                                    borderRadius: "var(--radius-md)",
+                                    background: "rgba(239,68,68,0.06)",
+                                    border: "1.5px solid rgba(239,68,68,0.2)",
+                                    color: "#DC2626",
+                                }}
+                            >
+                                <LogOut className="w-4 h-4" />
+                                Đăng xuất
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

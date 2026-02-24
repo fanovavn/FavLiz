@@ -4,6 +4,51 @@ Tất cả thay đổi đáng chú ý của **Web User** sẽ được ghi nhậ
 
 ---
 
+## [v1.4.6] — 2026-02-24
+
+### 📱 Tối ưu giao diện Mobile
+
+#### 🎨 Cải thiện giao diện
+- **Xoá Stats Bar trên trang Bộ sưu tập** — bỏ block 3 thống kê (Bộ sưu tập / Tổng link hay / Công khai) để giao diện gọn hơn trên mobile
+- **Nút "+" nằm góc trên phải** — trên mobile, nút tạo mới giờ nằm cùng hàng với tiêu đề thay vì rơi xuống hàng dưới (áp dụng cho cả Items và Bộ sưu tập)
+- **Compact list rows Bộ sưu tập** — giảm chiều cao mỗi hàng để hiển thị nhiều bộ sưu tập hơn:
+  - Avatar: 56px → 40px
+  - Padding: `p-4` → `px-3 py-2.5`
+  - Khoảng cách giữa hàng: `space-y-3` → `space-y-2`
+- **Mô tả Item grid tối đa 3 dòng** — tăng từ `line-clamp-2` lên `line-clamp-3` cho phần mô tả trong chế độ grid
+
+#### ✨ Tính năng mới
+- **Nút Đăng xuất trong Cài đặt** — thêm nút đăng xuất màu đỏ ở cuối trang Cài đặt, dễ truy cập trên mobile (trước đây chỉ có trong sidebar desktop)
+
+---
+
+## [v1.4.3] — 2026-02-24
+
+### 🧹 Dashboard gọn gàng & Trang pháp lý
+
+#### ✨ Tính năng mới
+- **Trang Privacy Policy** (`/privacy`) — chính sách bảo mật đầy đủ 11 mục:
+  - Thu thập dữ liệu, cách sử dụng, chia sẻ, bảo mật, cookies
+  - Quyền riêng tư Chrome Extension, quyền người dùng
+- **Trang Terms of Service** (`/terms`) — điều khoản sử dụng 13 mục:
+  - Tài khoản, nội dung, sử dụng chấp nhận được, trách nhiệm, luật áp dụng
+- **Favicon SVG** — sử dụng icon FavLiz color SVG, sắc nét ở mọi kích thước, giữ PNG fallback
+
+#### 🎨 Cải thiện giao diện
+- **Dashboard** — dọn dẹp layout, bỏ các block ít giá trị:
+  - ❌ Bỏ biểu đồ "Hoạt động tuần này"
+  - ❌ Bỏ "Phân bố tag"
+  - ❌ Bỏ "Thao tác nhanh" (Quick Actions)
+  - ❌ Bỏ "Tip Banner"
+  - ❌ Bỏ card "Public" ở KPI
+  - 📐 KPI grid: 4 cột → 3 cột (Items, Bộ sưu tập, Tags)
+  - ⬇️ "Thêm gần đây" dời xuống cuối trang
+- **Footer homepage** — bỏ cột "Tài nguyên" (Use Cases, Blog, Changelog)
+- **Footer links** — Privacy Policy & Terms of Service giờ liên kết tới trang thật
+- **CTA section** — thay logo text PNG bằng icon FavLiz trắng SVG (48px)
+
+---
+
 ## [v1.4.2] — 2026-02-23
 
 ### 📱 Cải thiện UX bộ sưu tập & Mobile

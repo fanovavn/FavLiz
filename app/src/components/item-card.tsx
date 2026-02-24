@@ -52,7 +52,7 @@ export function ItemCard({ item }: ItemCardProps) {
                     </h3>
                     {item.description && (
                         <p
-                            className="text-xs line-clamp-2 mb-3"
+                            className="text-xs line-clamp-3 mb-3"
                             style={{ color: "var(--muted)" }}
                         >
                             {item.description}

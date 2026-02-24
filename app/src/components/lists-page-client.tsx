@@ -121,94 +121,6 @@ export function ListsPageClient({
                 </button>
             </div>
 
-            {/* Stats Bar */}
-            {lists.length > 0 && (
-                <div className="grid grid-cols-3 gap-3 mb-5">
-                    <div className="glass-card p-4 flex items-center gap-3">
-                        <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                            style={{
-                                background:
-                                    "color-mix(in srgb, var(--primary) 10%, transparent)",
-                            }}
-                        >
-                            <FolderOpen
-                                className="w-4.5 h-4.5"
-                                style={{ color: "var(--primary)" }}
-                            />
-                        </div>
-                        <div>
-                            <div
-                                className="text-lg font-bold"
-                                style={{ color: "#1E293B" }}
-                            >
-                                {lists.length}
-                            </div>
-                            <div
-                                className="text-xs"
-                                style={{ color: "var(--muted)" }}
-                            >
-                                {t.title}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="glass-card p-4 flex items-center gap-3">
-                        <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                            style={{
-                                background: "rgba(59, 130, 246, 0.08)",
-                            }}
-                        >
-                            <Bookmark
-                                className="w-4.5 h-4.5"
-                                style={{ color: "#3B82F6" }}
-                            />
-                        </div>
-                        <div>
-                            <div
-                                className="text-lg font-bold"
-                                style={{ color: "#1E293B" }}
-                            >
-                                {totalItems}
-                            </div>
-                            <div
-                                className="text-xs"
-                                style={{ color: "var(--muted)" }}
-                            >
-                                {t.totalItems}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="glass-card p-4 flex items-center gap-3">
-                        <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                            style={{
-                                background: "rgba(245, 158, 11, 0.08)",
-                            }}
-                        >
-                            <Globe
-                                className="w-4.5 h-4.5"
-                                style={{ color: "#F59E0B" }}
-                            />
-                        </div>
-                        <div>
-                            <div
-                                className="text-lg font-bold"
-                                style={{ color: "#1E293B" }}
-                            >
-                                {publicCount}
-                            </div>
-                            <div
-                                className="text-xs"
-                                style={{ color: "var(--muted)" }}
-                            >
-                                {t.publicCount}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Search + View Toggle */}
             {lists.length > 0 && (
                 <div className="flex items-center gap-3 mb-5">
@@ -319,19 +231,19 @@ export function ListsPageClient({
 
             {/* LIST VIEW */}
             {lists.length > 0 && viewMode === "list" && (
-                <div className="space-y-3">
+                <div className="space-y-2">
                     {filtered.map((list) => (
                         <Link
                             key={list.id}
                             href={`/lists/${list.id}`}
-                            className="glass-card glass-card-hover block p-4 group"
+                            className="glass-card glass-card-hover block px-3 py-2.5 group"
                             style={{ textDecoration: "none" }}
                         >
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
                                 {/* Thumbnail / Avatar */}
                                 {list.thumbnail ? (
                                     <div
-                                        className="w-14 h-14 rounded-xl overflow-hidden shrink-0"
+                                        className="w-10 h-10 rounded-lg overflow-hidden shrink-0"
                                         style={{
                                             border: "1.5px solid rgba(0,0,0,0.06)",
                                         }}
@@ -344,14 +256,14 @@ export function ListsPageClient({
                                     </div>
                                 ) : (
                                     <div
-                                        className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+                                        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                                         style={{
                                             background: getThumbnailColor(
                                                 list.name
                                             ),
                                         }}
                                     >
-                                        <span className="text-white font-bold text-sm">
+                                        <span className="text-white font-bold text-xs">
                                             {getInitials(list.name)}
                                         </span>
                                     </div>
@@ -367,7 +279,7 @@ export function ListsPageClient({
                                     </h3>
                                     {list.description && (
                                         <p
-                                            className="text-sm truncate mt-0.5"
+                                            className="text-xs truncate"
                                             style={{ color: "var(--muted)" }}
                                         >
                                             {list.description}
@@ -428,18 +340,18 @@ export function ListsPageClient({
                     {showUncategorized && (
                         <Link
                             href="/lists/uncategorized"
-                            className="glass-card glass-card-hover block p-4 group"
+                            className="glass-card glass-card-hover block px-3 py-2.5 group"
                             style={{ textDecoration: "none" }}
                         >
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
                                 <div
-                                    className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+                                    className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                                     style={{
                                         background:
                                             "linear-gradient(135deg, #94A3B8, #CBD5E1)",
                                     }}
                                 >
-                                    <span className="text-white font-bold text-sm">
+                                    <span className="text-white font-bold text-xs">
                                         FL
                                     </span>
                                 </div>
