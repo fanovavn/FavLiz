@@ -8,6 +8,7 @@ import {
     Tags,
     FolderOpen,
     Trash2,
+    ArrowLeft,
 } from "lucide-react";
 import { getItem } from "@/lib/item-actions";
 import { getShareUrl } from "@/lib/share-actions";
@@ -16,6 +17,7 @@ import { DeleteItemButton } from "@/components/delete-item-dialog";
 import { AttachmentViewer } from "@/components/attachment-viewer";
 import { ShareButton } from "@/components/share-button";
 import { TagChipButton } from "@/components/tag-chip-button";
+import { LinkifyText } from "@/components/linkify-text";
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -32,6 +34,19 @@ export default async function ItemDetailPage({ params }: Props) {
 
     return (
         <div className="px-4 sm:px-6 md:px-10 py-6 md:py-8 max-w-[1280px] mx-auto">
+            {/* Back button - mobile only */}
+            <Link
+                href="/items"
+                className="md:hidden inline-flex items-center gap-1.5 mb-4 text-sm font-medium transition-colors"
+                style={{
+                    color: "var(--muted)",
+                    textDecoration: "none",
+                }}
+            >
+                <ArrowLeft className="w-4 h-4" />
+                Về danh sách
+            </Link>
+
             {/* Hero Card: Left-aligned Thumbnail + Badge + Title + Description */}
             <div
                 className="glass-card mb-6 relative"
@@ -120,12 +135,11 @@ export default async function ItemDetailPage({ params }: Props) {
 
                 {/* Description */}
                 {item.description && (
-                    <p
+                    <LinkifyText
+                        text={item.description}
                         className="leading-relaxed whitespace-pre-wrap"
                         style={{ color: "var(--muted)", fontSize: "0.95rem" }}
-                    >
-                        {item.description}
-                    </p>
+                    />
                 )}
             </div>
 

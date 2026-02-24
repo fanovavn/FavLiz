@@ -4,6 +4,24 @@ Tất cả thay đổi đáng chú ý của **Web User** sẽ được ghi nhậ
 
 ---
 
+## [v1.5.0] — 2026-02-24
+
+### ✏️ Trải nghiệm nhập liệu & Chi tiết Item
+
+#### ✨ Tính năng mới
+- **Nút "Về danh sách" trên mobile** — thêm nút quay lại ở đầu trang chi tiết item, chỉ hiện trên mobile (`md:hidden`)
+- **Nút Lưu phía dưới form trên mobile** — thêm nút lưu full-width ở cuối form tạo/sửa item, tiện bấm trên mobile
+- **Auto-resize textarea** — ô Tiêu đề và Mô tả tự giãn chiều cao theo nội dung, không cần kéo tay
+- **Đếm ký tự Mô tả** — hiển thị `xxx/5000` ở góc phải dưới ô mô tả, đổi đỏ khi vượt 90%
+- **Link nhấn được trong mô tả** — URL trong phần mô tả chi tiết item tự động thành link clickable, mở tab mới
+
+#### 🔌 Chrome Extension
+- **Title textarea 24px bold** — ô nhập tiêu đề đổi thành textarea auto-resize, font lớn 24px bold
+- **Description counter** — hiển thị `xxx/5000` ký tự ở ô mô tả, auto-resize với max-height 300px
+- **Đồng bộ config input** — giới hạn ký tự và hành vi nhập liệu giống web user (Title 500, Description 5000)
+
+---
+
 ## [v1.4.6] — 2026-02-24
 
 ### 📱 Tối ưu giao diện Mobile

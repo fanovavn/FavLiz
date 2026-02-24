@@ -338,6 +338,18 @@
     box-shadow: 0 0 0 3px rgba(255, 30, 86, 0.1) !important;
 }
 
+/* ─── Character Counter ──────────────────────────────────────── */
+.favliz-ext-char-counter {
+    position: absolute !important;
+    right: 10px !important;
+    bottom: 4px !important;
+    font-size: 10px !important;
+    font-family: var(--favliz-font) !important;
+    color: rgba(148, 163, 184, 0.6) !important;
+    pointer-events: none !important;
+    line-height: 1 !important;
+}
+
 /* ─── Multi-Select ───────────────────────────────────────────── */
 .favliz-ext-multiselect {
     position: relative !important;

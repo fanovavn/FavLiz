@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -533,14 +533,28 @@ export function ItemForm({
                             {t("itemForm.nameLabel", { item: singleItemLabel })}{" "}
                             <span style={{ color: "var(--primary)" }}>*</span>
                         </label>
-                        <input
-                            type="text"
+                        <textarea
+                            ref={(el) => {
+                                if (el) {
+                                    el.style.height = 'auto';
+                                    el.style.height = el.scrollHeight + 'px';
+                                }
+                            }}
                             className="input-glass"
                             placeholder={t("itemForm.namePlaceholder")}
                             value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            onChange={(e) => {
+                                if (e.target.value.length <= 500) {
+                                    setTitle(e.target.value);
+                                }
+                                const el = e.target;
+                                el.style.height = 'auto';
+                                el.style.height = el.scrollHeight + 'px';
+                            }}
                             autoFocus
-                            style={{ fontSize: "22px", fontWeight: 700 }}
+                            rows={1}
+                            maxLength={500}
+                            style={{ fontSize: "22px", fontWeight: 700, resize: "none", overflow: "hidden" }}
                         />
                     </div>
 
@@ -556,14 +570,41 @@ export function ItemForm({
                             <FileText className="w-4 h-4" />
                             {t("itemForm.descLabel")}
                         </label>
-                        <textarea
-                            className="textarea-glass"
-                            placeholder={t("itemForm.descPlaceholder", { item: singleItemLabel })}
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            rows={3}
-                            style={{ minHeight: "80px" }}
-                        />
+                        <div className="relative">
+                            <textarea
+                                ref={(el) => {
+                                    if (el) {
+                                        el.style.height = 'auto';
+                                        el.style.height = Math.min(el.scrollHeight, 600) + 'px';
+                                    }
+                                }}
+                                className="textarea-glass"
+                                placeholder={t("itemForm.descPlaceholder", { item: singleItemLabel })}
+                                value={description}
+                                onChange={(e) => {
+                                    if (e.target.value.length <= 5000) {
+                                        setDescription(e.target.value);
+                                    }
+                                    const el = e.target;
+                                    el.style.height = 'auto';
+                                    el.style.height = Math.min(el.scrollHeight, 600) + 'px';
+                                }}
+                                rows={3}
+                                maxLength={5000}
+                                style={{ minHeight: "80px", maxHeight: "600px", resize: "none", overflowY: "auto", paddingBottom: "24px" }}
+                            />
+                            <span
+                                className="absolute text-[11px] pointer-events-none"
+                                style={{
+                                    right: 12,
+                                    bottom: 6,
+                                    color: description.length > 4500 ? "#EF4444" : "var(--muted-light)",
+                                    opacity: 0.7,
+                                }}
+                            >
+                                {description.length}/5000
+                            </span>
+                        </div>
                     </div>
 
                     {/* Divider */}
@@ -980,6 +1021,35 @@ export function ItemForm({
                         </div>
                     </div>
                 </form>
+
+                {/* Mobile bottom save button */}
+                <div className="md:hidden mt-5 pb-4">
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            const form = document.querySelector<HTMLFormElement>('#item-form');
+                            form?.requestSubmit();
+                        }}
+                        disabled={loading}
+                        className="w-full gradient-btn justify-center py-3 text-base"
+                    >
+                        {loading ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                {t("itemForm.saving")}
+                            </>
+                        ) : (
+                            <>
+                                <Check className="w-5 h-5" />
+                                {mode === "create"
+                                    ? t("itemForm.saveItem", { item: singleItemLabel })
+                                    : t("itemForm.updateItem", { item: singleItemLabel })
+                                }
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
 
             {/* Auto-fill confirmation dialog */}

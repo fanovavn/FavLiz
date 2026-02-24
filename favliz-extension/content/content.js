@@ -286,12 +286,15 @@
                 <div class="${FAVLIZ_PREFIX}-form">
                     <div class="${FAVLIZ_PREFIX}-field">
                         <label>Title *</label>
-                        <input type="text" id="${FAVLIZ_PREFIX}-title" value="${escapeAttr(data.title || "")}" placeholder="Enter title" />
+                        <textarea id="${FAVLIZ_PREFIX}-title" rows="1" placeholder="Enter title" style="resize:none;overflow:hidden;font-size:24px;font-weight:700;">${escapeHtml(data.title || "")}</textarea>
                     </div>
 
                     <div class="${FAVLIZ_PREFIX}-field">
                         <label>Description</label>
-                        <textarea id="${FAVLIZ_PREFIX}-desc" rows="3" placeholder="Add a description">${escapeHtml(data.description || "")}</textarea>
+                        <div style="position:relative;">
+                            <textarea id="${FAVLIZ_PREFIX}-desc" rows="3" placeholder="Add a description" style="resize:none;overflow-y:auto;max-height:300px;padding-bottom:22px;">${escapeHtml(data.description || "")}</textarea>
+                            <span class="${FAVLIZ_PREFIX}-char-counter" id="${FAVLIZ_PREFIX}-desc-counter">${(data.description || "").length}/5000</span>
+                        </div>
                     </div>
 
                     <div class="${FAVLIZ_PREFIX}-field">
@@ -342,6 +345,10 @@
 
         // Setup event listeners
         setupModalListeners(data, lists, tags);
+
+        // Setup auto-resize for title and description textareas
+        setupAutoResize(`${FAVLIZ_PREFIX}-title`, 500, null);
+        setupAutoResize(`${FAVLIZ_PREFIX}-desc`, 5000, `${FAVLIZ_PREFIX}-desc-counter`, 300);
     }
 
     function setupModalListeners(data, lists, tags) {
@@ -548,6 +555,42 @@
                 }
             });
         }
+    }
+
+    // ─── Auto-Resize Textareas with Char Counter ────────────
+    function setupAutoResize(elementId, maxLength, counterId, maxHeight) {
+        const el = document.getElementById(elementId);
+        const counter = document.getElementById(counterId);
+        if (!el) return;
+
+        function resize() {
+            el.style.height = 'auto';
+            if (maxHeight) {
+                el.style.height = Math.min(el.scrollHeight, maxHeight) + 'px';
+            } else {
+                el.style.height = el.scrollHeight + 'px';
+            }
+        }
+
+        function updateCounter() {
+            if (!counter) return;
+            const len = el.value.length;
+            counter.textContent = `${len}/${maxLength}`;
+            const threshold = maxLength * 0.9;
+            counter.style.color = len > threshold ? '#ef4444' : 'rgba(148,163,184,0.6)';
+        }
+
+        el.addEventListener('input', () => {
+            if (el.value.length > maxLength) {
+                el.value = el.value.slice(0, maxLength);
+            }
+            resize();
+            updateCounter();
+        });
+
+        // Initial sizing
+        resize();
+        updateCounter();
     }
 
     function renderChips(prefix, selectedSet, type, options) {
