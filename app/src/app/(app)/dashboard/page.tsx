@@ -66,16 +66,6 @@ export default async function DashboardPage() {
             deltaColor: "",
             href: "/tags",
         },
-        {
-            label: t(locale, "common.public"),
-            value: stats.publicCount,
-            icon: Globe,
-            color: "#16A34A",
-            bg: "rgba(22, 163, 74, 0.08)",
-            delta: null,
-            deltaColor: "",
-            href: "",
-        },
     ];
 
     return (
@@ -117,7 +107,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* ═══════════ 2. KPI STAT CARDS ═══════════ */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 md:mb-8">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 md:mb-8">
                 {statCards.map((card) => {
                     const inner = (
                         <>
@@ -164,83 +154,6 @@ export default async function DashboardPage() {
                 })}
             </div>
 
-            {/* ═══════════ 3. RECENT ITEMS ═══════════ */}
-            <div className="mb-6 md:mb-8">
-                {/* Recent Items */}
-                <div className="glass-card p-4 sm:p-6">
-                    <div className="flex items-center justify-between mb-5">
-                        <h2 className="font-semibold flex items-center gap-2" style={{ color: "#1E293B" }}>
-                            <Clock className="w-4 h-4" style={{ color: "var(--primary)" }} />
-                            {t(locale, "dashboard.recentlyAdded")}
-                        </h2>
-                        <Link
-                            href="/items"
-                            className="text-sm font-medium flex items-center gap-1"
-                            style={{ color: "var(--primary)" }}
-                        >
-                            {t(locale, "common.viewAll")}
-                            <ArrowRight className="w-3.5 h-3.5" />
-                        </Link>
-                    </div>
-
-                    {stats.recentItems.length === 0 ? (
-                        <div className="empty-state">
-                            <div className="icon">
-                                <Bookmark className="w-6 h-6" style={{ color: "var(--primary-light)" }} />
-                            </div>
-                            <p className="text-sm" style={{ color: "var(--muted)" }}>
-                                {t(locale, "dashboard.noItemsYet", { item: singleItemLabel })}
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="space-y-2">
-                            {stats.recentItems.map((item) => (
-                                <Link
-                                    key={item.id}
-                                    href={`/items/${item.id}`}
-                                    className="flex items-center gap-3 p-3 rounded-xl transition-colors group cursor-pointer hover:bg-pink-50/50"
-                                >
-                                    {item.thumbnail ? (
-                                        <img
-                                            src={item.thumbnail}
-                                            alt={item.title}
-                                            className="w-10 h-10 rounded-xl object-cover shrink-0"
-                                        />
-                                    ) : (
-                                        <div
-                                            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-semibold text-sm shrink-0"
-                                            style={{ background: getThumbnailColor(item.title) }}
-                                        >
-                                            {item.title.slice(0, 2).toUpperCase()}
-                                        </div>
-                                    )}
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium truncate text-sm" style={{ color: "#334155" }}>
-                                            {item.title}
-                                        </p>
-                                        {item.tags.length > 0 && (
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                                {item.tags.slice(0, 3).map((tag) => (
-                                                    <span key={tag.id} className="text-xs" style={{ color: "var(--primary-light)" }}>
-                                                        #{tag.name}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <span className={`badge ${item.viewMode === "PUBLIC" ? "badge-public" : "badge-private"}`}>
-                                        {item.viewMode === "PUBLIC" ? (
-                                            <><Globe className="w-3 h-3" /> {t(locale, "common.public")}</>
-                                        ) : (
-                                            <><Lock className="w-3 h-3" /> {t(locale, "common.private")}</>
-                                        )}
-                                    </span>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
 
             {/* ═══════════ 5. FEATURED COLLECTIONS + POPULAR TAGS ═══════════ */}
             <div className="grid md:grid-cols-2 gap-4 md:gap-5 mb-6 md:mb-8">
@@ -378,6 +291,83 @@ export default async function DashboardPage() {
                 >
                     {t(locale, "dashboard.tryNow")}
                 </Link>
+            </div>
+
+            {/* ═══════════ RECENT ITEMS ═══════════ */}
+            <div className="mb-6 md:mb-8">
+                <div className="glass-card p-4 sm:p-6">
+                    <div className="flex items-center justify-between mb-5">
+                        <h2 className="font-semibold flex items-center gap-2" style={{ color: "#1E293B" }}>
+                            <Clock className="w-4 h-4" style={{ color: "var(--primary)" }} />
+                            {t(locale, "dashboard.recentlyAdded")}
+                        </h2>
+                        <Link
+                            href="/items"
+                            className="text-sm font-medium flex items-center gap-1"
+                            style={{ color: "var(--primary)" }}
+                        >
+                            {t(locale, "common.viewAll")}
+                            <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                    </div>
+
+                    {stats.recentItems.length === 0 ? (
+                        <div className="empty-state">
+                            <div className="icon">
+                                <Bookmark className="w-6 h-6" style={{ color: "var(--primary-light)" }} />
+                            </div>
+                            <p className="text-sm" style={{ color: "var(--muted)" }}>
+                                {t(locale, "dashboard.noItemsYet", { item: singleItemLabel })}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {stats.recentItems.map((item) => (
+                                <Link
+                                    key={item.id}
+                                    href={`/items/${item.id}`}
+                                    className="flex items-center gap-3 p-3 rounded-xl transition-colors group cursor-pointer hover:bg-pink-50/50"
+                                >
+                                    {item.thumbnail ? (
+                                        <img
+                                            src={item.thumbnail}
+                                            alt={item.title}
+                                            className="w-10 h-10 rounded-xl object-cover shrink-0"
+                                        />
+                                    ) : (
+                                        <div
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-semibold text-sm shrink-0"
+                                            style={{ background: getThumbnailColor(item.title) }}
+                                        >
+                                            {item.title.slice(0, 2).toUpperCase()}
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-medium truncate text-sm" style={{ color: "#334155" }}>
+                                            {item.title}
+                                        </p>
+                                        {item.tags.length > 0 && (
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                {item.tags.slice(0, 3).map((tag) => (
+                                                    <span key={tag.id} className="text-xs" style={{ color: "var(--primary-light)" }}>
+                                                        #{tag.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <span className={`badge ${item.viewMode === "PUBLIC" ? "badge-public" : "badge-private"}`}>
+                                        {item.viewMode === "PUBLIC" ? (
+                                            <><Globe className="w-3 h-3" /> {t(locale, "common.public")}</>
+                                        ) : (
+                                            <><Lock className="w-3 h-3" /> {t(locale, "common.private")}</>
+                                        )}
+                                    </span>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div >
     );
