@@ -642,54 +642,85 @@ export function ItemForm({
                                 {attachments.map((att, i) => (
                                     <div
                                         key={i}
-                                        className="flex items-center gap-2"
+                                        className="flex flex-col gap-2"
                                     >
                                         {att.type === "LINK" ? (
                                             <>
-                                                <div
-                                                    className="w-9 h-9 shrink-0 flex items-center justify-center"
-                                                    style={{
-                                                        borderRadius: "var(--radius-md)",
-                                                        background: "rgba(59, 130, 246, 0.06)",
-                                                        color: "#3B82F6",
-                                                    }}
-                                                >
-                                                    <Link2 className="w-4 h-4" />
-                                                </div>
-                                                <input
-                                                    type="url"
-                                                    className="input-glass flex-1"
-                                                    placeholder="https://youtube.com/watch?v=..."
-                                                    value={att.url}
-                                                    onChange={(e) =>
-                                                        updateAttachmentUrl(i, e.target.value)
-                                                    }
-                                                />
-                                                {/* Magic wand auto-fill button */}
-                                                {isValidUrl(att.url) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setShowAutoFillConfirm({ index: i, url: att.url })}
-                                                        disabled={fetchingMetadata === i}
-                                                        className="w-9 h-9 flex items-center justify-center shrink-0 cursor-pointer transition-all"
-                                                        title={t("autoFillFromLink") || "Tự động điền từ link"}
+                                                <div className="flex items-start gap-2">
+                                                    <div
+                                                        className="w-9 h-9 shrink-0 flex items-center justify-center mt-0.5"
                                                         style={{
                                                             borderRadius: "var(--radius-md)",
-                                                            border: "1px solid rgba(168, 85, 247, 0.2)",
-                                                            background: "rgba(168, 85, 247, 0.06)",
-                                                            color: "#A855F7",
+                                                            background: "rgba(59, 130, 246, 0.06)",
+                                                            color: "#3B82F6",
                                                         }}
                                                     >
-                                                        {fetchingMetadata === i ? (
-                                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                                        ) : (
-                                                            <Wand2 className="w-4 h-4" />
+                                                        <Link2 className="w-4 h-4" />
+                                                    </div>
+                                                    <textarea
+                                                        ref={(el) => {
+                                                            if (el) {
+                                                                el.style.height = 'auto';
+                                                                el.style.height = el.scrollHeight + 'px';
+                                                            }
+                                                        }}
+                                                        className="input-glass flex-1"
+                                                        placeholder="https://youtube.com/watch?v=..."
+                                                        value={att.url}
+                                                        onChange={(e) => {
+                                                            updateAttachmentUrl(i, e.target.value);
+                                                            const el = e.target;
+                                                            el.style.height = 'auto';
+                                                            el.style.height = el.scrollHeight + 'px';
+                                                        }}
+                                                        rows={1}
+                                                        style={{
+                                                            resize: "none",
+                                                            overflow: "hidden",
+                                                            wordBreak: "break-all",
+                                                            minHeight: "40px",
+                                                        }}
+                                                    />
+                                                    <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                                                        {/* Magic wand auto-fill button */}
+                                                        {isValidUrl(att.url) && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setShowAutoFillConfirm({ index: i, url: att.url })}
+                                                                disabled={fetchingMetadata === i}
+                                                                className="w-9 h-9 flex items-center justify-center shrink-0 cursor-pointer transition-all"
+                                                                title={t("autoFillFromLink") || "Tự động điền từ link"}
+                                                                style={{
+                                                                    borderRadius: "var(--radius-md)",
+                                                                    border: "1px solid rgba(168, 85, 247, 0.2)",
+                                                                    background: "rgba(168, 85, 247, 0.06)",
+                                                                    color: "#A855F7",
+                                                                }}
+                                                            >
+                                                                {fetchingMetadata === i ? (
+                                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                                ) : (
+                                                                    <Wand2 className="w-4 h-4" />
+                                                                )}
+                                                            </button>
                                                         )}
-                                                    </button>
-                                                )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeAttachment(i)}
+                                                            className="w-9 h-9 flex items-center justify-center shrink-0 cursor-pointer transition-colors"
+                                                            style={{
+                                                                borderRadius: "var(--radius-md)",
+                                                                border: "1px solid rgba(239, 68, 68, 0.15)",
+                                                                color: "#EF4444",
+                                                            }}
+                                                        >
+                                                            <X className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </>
                                         ) : (
-                                            <>
+                                            <div className="flex items-center gap-2">
                                                 <div
                                                     className="w-9 h-9 shrink-0 overflow-hidden"
                                                     style={{
@@ -709,20 +740,20 @@ export function ItemForm({
                                                 >
                                                     {att.url.split("/").pop()}
                                                 </span>
-                                            </>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeAttachment(i)}
+                                                    className="w-9 h-9 flex items-center justify-center shrink-0 cursor-pointer transition-colors"
+                                                    style={{
+                                                        borderRadius: "var(--radius-md)",
+                                                        border: "1px solid rgba(239, 68, 68, 0.15)",
+                                                        color: "#EF4444",
+                                                    }}
+                                                >
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
                                         )}
-                                        <button
-                                            type="button"
-                                            onClick={() => removeAttachment(i)}
-                                            className="w-9 h-9 flex items-center justify-center shrink-0 cursor-pointer transition-colors"
-                                            style={{
-                                                borderRadius: "var(--radius-md)",
-                                                border: "1px solid rgba(239, 68, 68, 0.15)",
-                                                color: "#EF4444",
-                                            }}
-                                        >
-                                            <X className="w-3.5 h-3.5" />
-                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -1192,6 +1223,52 @@ export function ItemForm({
                             style={{ color: "rgba(255, 255, 255, 0.9)" }}
                         >
                             Đang lấy thông tin từ link...
+                        </p>
+                        <p
+                            className="text-xs"
+                            style={{ color: "rgba(255, 255, 255, 0.45)" }}
+                        >
+                            Vui lòng chờ trong giây lát
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Saving overlay */}
+            {loading && (
+                <div
+                    className="fixed inset-0 flex flex-col items-center justify-center"
+                    style={{
+                        zIndex: 10001,
+                        background: "rgba(0, 0, 0, 0.6)",
+                        backdropFilter: "blur(6px)",
+                    }}
+                >
+                    <div
+                        className="flex flex-col items-center gap-4 p-8 rounded-2xl"
+                        style={{
+                            background: "rgba(255, 255, 255, 0.08)",
+                            border: "1px solid rgba(255, 255, 255, 0.1)",
+                            animation: "fadeSlideUp 0.25s ease",
+                        }}
+                    >
+                        <div
+                            className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                            style={{
+                                background: "linear-gradient(135deg, var(--primary), var(--primary-hover))",
+                                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+                                animation: "pulse 1.5s ease-in-out infinite",
+                            }}
+                        >
+                            <Loader2
+                                className="w-8 h-8 animate-spin text-white"
+                            />
+                        </div>
+                        <p
+                            className="text-base font-semibold"
+                            style={{ color: "rgba(255, 255, 255, 0.95)" }}
+                        >
+                            {mode === "create" ? t("itemForm.saving") : "Đang cập nhật..."}
                         </p>
                         <p
                             className="text-xs"

@@ -11,6 +11,9 @@ chrome.runtime.onInstalled.addListener(() => {
         title: "Add link to FavLiz",
         contexts: ["link"],
     });
+
+    // Set up periodic token refresh alarm (every 45 minutes)
+    chrome.alarms.create("favliz-token-refresh", { periodInMinutes: 45 });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -27,6 +30,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
 });
 
+// ─── Periodic Token Refresh ──────────────────────────────────
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === "favliz-token-refresh") {
+        console.log("[FavLiz SW] Periodic token refresh check...");
+        await ensureValidToken();
+    }
+});
+
 // ─── Token Management ────────────────────────────────────────
 async function getToken() {
     const result = await chrome.storage.local.get(["access_token"]);
@@ -34,12 +45,16 @@ async function getToken() {
 }
 
 async function setAuth(data) {
-    await chrome.storage.local.set({
+    const authData = {
         access_token: data.access_token,
         refresh_token: data.refresh_token,
         expires_at: data.expires_at,
-        user: data.user,
-    });
+    };
+    // Only set user if provided (login response has user, refresh doesn't)
+    if (data.user !== undefined) {
+        authData.user = data.user;
+    }
+    await chrome.storage.local.set(authData);
 }
 
 async function clearAuth() {
@@ -56,9 +71,74 @@ async function getUser() {
     return result.user || null;
 }
 
+// ─── Token Refresh ───────────────────────────────────────────
+let isRefreshing = false;
+
+async function refreshAccessToken() {
+    if (isRefreshing) return false;
+    isRefreshing = true;
+
+    try {
+        const stored = await chrome.storage.local.get(["refresh_token"]);
+        const refreshToken = stored.refresh_token;
+
+        if (!refreshToken) {
+            console.warn("[FavLiz SW] No refresh token available");
+            await clearAuth();
+            return false;
+        }
+
+        const response = await fetch(`${API_BASE}/auth/refresh`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+
+        if (!response.ok) {
+            console.warn("[FavLiz SW] Token refresh failed:", response.status);
+            await clearAuth();
+            return false;
+        }
+
+        const data = await response.json();
+        await setAuth(data);
+        console.log("[FavLiz SW] Token refreshed successfully");
+        return true;
+    } catch (err) {
+        console.error("[FavLiz SW] Token refresh error:", err);
+        return false;
+    } finally {
+        isRefreshing = false;
+    }
+}
+
+// Check if token is expired or about to expire (within 5 minutes)
+async function ensureValidToken() {
+    const stored = await chrome.storage.local.get(["access_token", "expires_at", "refresh_token"]);
+
+    if (!stored.access_token || !stored.refresh_token) {
+        return null; // Not logged in
+    }
+
+    if (stored.expires_at) {
+        const now = Math.floor(Date.now() / 1000);
+        const bufferSeconds = 5 * 60; // Refresh 5 minutes before expiry
+
+        if (now >= stored.expires_at - bufferSeconds) {
+            console.log("[FavLiz SW] Token expired or expiring soon, refreshing...");
+            const refreshed = await refreshAccessToken();
+            if (!refreshed) return null;
+        }
+    }
+
+    const result = await chrome.storage.local.get(["access_token"]);
+    return result.access_token || null;
+}
+
 // ─── API Calls ───────────────────────────────────────────────
 async function apiCall(endpoint, options = {}) {
-    const token = await getToken();
+    // Ensure we have a valid token before making the call
+    const token = await ensureValidToken();
     const headers = {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -71,12 +151,44 @@ async function apiCall(endpoint, options = {}) {
             headers,
         });
 
-        const data = await response.json();
-
+        // If 401, try refreshing token and retry once
         if (response.status === 401) {
+            console.log("[FavLiz SW] Got 401, attempting token refresh...");
+            const refreshed = await refreshAccessToken();
+
+            if (refreshed) {
+                // Retry with new token
+                const newToken = await getToken();
+                const retryHeaders = {
+                    "Content-Type": "application/json",
+                    ...(newToken ? { Authorization: `Bearer ${newToken}` } : {}),
+                    ...options.headers,
+                };
+
+                const retryResponse = await fetch(`${API_BASE}${endpoint}`, {
+                    ...options,
+                    headers: retryHeaders,
+                });
+
+                const retryData = await retryResponse.json();
+
+                if (retryResponse.status === 401) {
+                    await clearAuth();
+                    return { error: "Session expired. Please login again.", unauthorized: true };
+                }
+
+                if (!retryResponse.ok) {
+                    return { error: retryData.error || "Request failed" };
+                }
+
+                return { data: retryData };
+            }
+
             await clearAuth();
             return { error: "Session expired. Please login again.", unauthorized: true };
         }
+
+        const data = await response.json();
 
         if (!response.ok) {
             return { error: data.error || "Request failed" };

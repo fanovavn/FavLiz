@@ -4,6 +4,27 @@ Tất cả thay đổi đáng chú ý của **Web User** sẽ được ghi nhậ
 
 ---
 
+## [v1.6.0] — 2026-02-28
+
+### 🔐 Token Refresh & UX Mobile
+
+#### ✨ Tính năng mới
+- **Auto-refresh token Extension** — extension tự động refresh access token trước khi hết hạn (5 phút trước), không cần đăng nhập lại liên tục:
+  - Thêm API endpoint `/api/extension/auth/refresh` để refresh token
+  - Service worker tự kiểm tra `expires_at` và gọi refresh khi cần
+  - Khi API trả 401, tự retry 1 lần với token mới thay vì buộc logout
+  - Periodic alarm (mỗi 45 phút) kiểm tra và refresh token nền
+- **Fullscreen Saving Overlay** — khi lưu item trên mobile, màn hình tối lại với spinner xoay rõ ràng thay vì scroll lên đầu trang
+
+#### 🎨 Cải thiện giao diện
+- **Link attachment hiển thị đầy đủ trên mobile** — đổi `<input>` thành `<textarea>` auto-resize với `word-break: break-all`, URL dài tự xuống dòng để xem và chỉnh sửa dễ dàng
+
+#### 🔧 Backend / Infrastructure
+- Thêm quyền `alarms` vào manifest extension cho periodic token refresh
+- Thêm keyframe `fadeSlideUp` cho animation overlay
+
+---
+
 ## [v1.5.0] — 2026-02-24
 
 ### ✏️ Trải nghiệm nhập liệu & Chi tiết Item

@@ -236,7 +236,7 @@ export function AppSidebar({ userEmail, itemsLabel = "Items" }: AppSidebarProps)
                     </div>
                     <div className="px-4 py-2 text-center space-y-0.5">
                         <span style={{ fontSize: "10px", color: "var(--muted-light)", opacity: 0.5, display: "block" }}>
-                            v1.5.0
+                            v1.6.0
                         </span>
                         <span style={{ fontSize: "9px", color: "var(--muted-light)", opacity: 0.4, display: "block" }}>
                             From Fanova with ❤️
