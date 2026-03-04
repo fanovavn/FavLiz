@@ -47,13 +47,10 @@ import landingData from "@/lib/i18n/landing.json";
    ═══════════════════════════════════════════════════ */
 
 const platforms = [
-  "YouTube", "TikTok", "Reddit", "Facebook", "Instagram",
-  "GitHub", "Shopee", "Amazon", "Google Maps", "Medium",
-  "LinkedIn", "Twitter / X", "Airbnb", "StackOverflow",
-  "Pinterest", "Spotify", "DevDocs", "MDN", "Netflix",
-  "Apple Music", "Notion", "Figma", "Dribbble", "Behance",
-  "Product Hunt", "Hacker News", "Substack", "Wikipedia",
-  "Lazada", "Tiki", "Grab Food", "ShopeeFood", "Foody", "Google Docs",
+  "Video Platforms", "Social Media", "E-commerce", "Developer Tools",
+  "News & Blogs", "Music & Podcasts", "Travel & Maps", "Design & Creative",
+  "Q&A Forums", "Wikis & Docs", "Job Boards", "Food & Recipes",
+  "Learning Platforms", "Productivity Tools", "Cloud Storage", "Marketplaces",
 ];
 
 
@@ -284,9 +281,9 @@ export default async function LandingPage() {
                     <div className="text-gray-900 mb-4" style={{ fontSize: "0.9rem", fontWeight: 600 }}>Recent Items</div>
                     <div className="space-y-3">
                       {[
-                        { title: "Cách làm Phở Bò tại nhà chuẩn vị", platform: "YouTube", cls: "bg-red-100 text-red-600" },
-                        { title: "NextJS 15 App Router Best Practices", platform: "GitHub", cls: "bg-gray-100 text-gray-700" },
-                        { title: "Áo khoác mùa đông giảm 50%", platform: "Shopee", cls: "bg-orange-100 text-orange-600" },
+                        { title: "Cách làm Phở Bò tại nhà chuẩn vị", platform: "Recipe", cls: "bg-red-100 text-red-600" },
+                        { title: "NextJS 15 App Router Best Practices", platform: "Dev Docs", cls: "bg-gray-100 text-gray-700" },
+                        { title: "Áo khoác mùa đông giảm 50%", platform: "Shopping", cls: "bg-orange-100 text-orange-600" },
                       ].map((item) => (
                         <div key={item.title} className="flex items-center gap-4 bg-white rounded-lg p-3 border border-gray-100">
                           <div className="w-12 h-12 bg-pink-50 rounded-lg shrink-0" />

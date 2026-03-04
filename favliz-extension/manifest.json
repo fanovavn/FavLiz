@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "FavLiz — Save Your Favorites",
     "version": "1.0.0",
-    "description": "Save content from any website to FavLiz in seconds. Quick save from YouTube, Reddit, Facebook, Instagram, and more.",
+    "description": "Save and organize content from any website to FavLiz. Quickly bookmark articles, videos, and links with auto-filled details.",
     "icons": {
         "16": "assets/icon-16.png",
         "48": "assets/icon-48.png",
